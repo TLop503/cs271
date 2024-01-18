@@ -1,4 +1,4 @@
-Microsoft (R) Macro Assembler Version 14.35.32216.1	    01/18/24 11:19:00
+Microsoft (R) Macro Assembler Version 14.35.32216.1	    01/18/24 11:47:51
 Assignment1 (hw1.asm					     Page 1 - 1
 
 
@@ -58,17 +58,17 @@ Microsoft (R) Macro Assembler Version 14.35.32216.1	    01/18/24 11:19:00
 	   65 65 74 3A 20
 	   00
  00000081 00000000			usWidth	DWORD	?	;input
- 00000085 45 6E 74 65 72		prLen	BYTE	"Enter the length of the pasture in feet ", 0
+ 00000085 45 6E 74 65 72		prLen	BYTE	"Enter the length of the pasture in feet: ", 0
 	   20 74 68 65 20
 	   6C 65 6E 67 74
 	   68 20 6F 66 20
 	   74 68 65 20 70
 	   61 73 74 75 72
 	   65 20 69 6E 20
-	   66 65 65 74 20
-	   00
- 000000AE 00000000			usLen	DWORD	?	;input
- 000000B2 45 6E 74 65 72		prPlk	BYTE	"Enter the linear feet of planks availible", 0
+	   66 65 65 74 3A
+	   20 00
+ 000000AF 00000000			usLen	DWORD	?	;input
+ 000000B3 45 6E 74 65 72		prPlk	BYTE	"Enter the linear feet of planks availible: ", 0
 	   20 74 68 65 20
 	   6C 69 6E 65 61
 	   72 20 66 65 65
@@ -76,37 +76,100 @@ Microsoft (R) Macro Assembler Version 14.35.32216.1	    01/18/24 11:19:00
 	   70 6C 61 6E 6B
 	   73 20 61 76 61
 	   69 6C 69 62 6C
-	   65 00
- 000000DC 54 68 65 20 61		prArea	BYTE	"The area of the pasture is: ", 0
+	   65 3A 20 00
+ 000000DF 00000000			usPlk	DWORd	?	;input
+ 000000E3 54 68 65 20 61		prArea	BYTE	"The area of the pasture is: ", 0
 	   72 65 61 20 6F
 	   66 20 74 68 65
 	   20 70 61 73 74
 	   75 72 65 20 69
 	   73 3A 20 00
- 000000F9 00000000			area	DWORD	?
- 000000FD 54 68 65 20 70		prPerim	BYTE	"The perimiter is: ", 0
+ 00000100 00000000			area	DWORD	?
+ 00000104 54 68 65 20 70		prPerim	BYTE	"The perimiter is: ", 0
 	   65 72 69 6D 69
 	   74 65 72 20 69
 	   73 3A 20 00
- 00000110 00000000			perim	DWORD	?
+ 00000117 00000000			perim	DWORD	?
 					
  00000000				.code
  00000000				main PROC
 
 					; 1. Introduce program
  00000000  BA 00000000 R		mov		edx, OFFSET intro
- 00000005  E8 00000000 E		call	writeString
- 0000000A  E8 00000000 E		call	crlf					;newline
+ 00000005  E8 00000000 E		call	WriteString
+ 0000000A  E8 00000000 E		call	Crlf		;newline
+
+					; 2. Get user's name
+ 0000000F  BA 00000025 R		mov		edx, OFFSET prName
+ 00000014  E8 00000000 E		call	WriteString
+
+ 00000019  BA 00000037 R		mov		edx, OFFSET usName
+ 0000001E  B9 00000020			mov		ecx, 32
+ 00000023  E8 00000000 E		call	ReadString
+ 00000028  E8 00000000 E		call	Crlf
+
+					; 3. Get pasture specs from user
+ 0000002D  BA 00000058 R		mov		edx, OFFSET prWidth
+ 00000032  E8 00000000 E		call	WriteString
+
+ 00000037  E8 00000000 E		call	ReadInt		;stores in eax
+ 0000003C  A3 00000081 R		mov		usWidth, eax
+ 00000041  E8 00000000 E		call	Crlf
+
+ 00000046  BA 00000085 R		mov		edx, OFFSET prLen
+ 0000004B  E8 00000000 E		call	WriteString
+
+ 00000050  E8 00000000 E		call	ReadInt
+ 00000055  A3 000000AF R		mov		usLen, eax
+ 0000005A  E8 00000000 E		call	Crlf
+
+ 0000005F  BA 000000B3 R		mov		edx, OFFSET prPlk
+ 00000064  E8 00000000 E		call	WriteString
+
+ 00000069  E8 00000000 E		call	ReadInt
+ 0000006E  A3 000000DF R		mov		usPlk, eax
+ 00000073  E8 00000000 E		call	Crlf
+
+					; 4. Do calcs for area
+ 00000078  A1 000000AF R		mov eax, usLen		;factor1
+ 0000007D  8B 1D 00000081 R		mov ebx, usWidth	;factor2
+ 00000083  F7 E3			mul ebx				;eax * ebx, stored in eax
+ 00000085  A3 00000100 R		mov area, eax
+
+ 0000008A  BA 000000E3 R		mov edx, OFFSET prArea
+ 0000008F  E8 00000000 E		call WriteString
+					
+ 00000094  A1 00000100 R		mov eax, area
+ 00000099  E8 00000000 E		call WriteDec		;print eax (area)
+ 0000009E  E8 00000000 E		call Crlf
+
+					; 5. Do calcs for perimiter
+ 000000A3  A1 000000AF R		mov eax, usLen	
+ 000000A8  03 05 00000081 R		add eax, usWidth
+ 000000AE  BB 00000002			mov ebx, 2			;perimiter = (l + w )*2
+ 000000B3  F7 E3			mul ebx
+ 000000B5  A3 00000117 R		mov	perim, eax
+
+ 000000BA  BA 00000104 R		mov edx, OFFSET prPerim
+ 000000BF  E8 00000000 E		call WriteString
+					
+ 000000C4  A1 00000117 R		mov eax, perim
+ 000000C9  E8 00000000 E		call WriteDec
+ 000000CE  E8 00000000 E		call Crlf
 
 
+
+
+
+					;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;
 					;from template
 					exit ; exit to operating system
- 0000000F  6A 00	   *	    push   +000000000h
- 00000011  E8 00000000 E   *	    call   ExitProcess
- 00000016			main ENDP
+ 000000D3  6A 00	   *	    push   +000000000h
+ 000000D5  E8 00000000 E   *	    call   ExitProcess
+ 000000DA			main ENDP
 				; (insert additional procedures here)
 				END main
-Microsoft (R) Macro Assembler Version 14.35.32216.1	    01/18/24 11:19:00
+Microsoft (R) Macro Assembler Version 14.35.32216.1	    01/18/24 11:47:51
 Assignment1 (hw1.asm					     Symbols 2 - 1
 
 
@@ -200,8 +263,8 @@ Segments and Groups:
 
 FLAT . . . . . . . . . . . . . .	GROUP
 STACK  . . . . . . . . . . . . .	32 Bit	 00001000 Para	  Stack	  'STACK'	 
-_DATA  . . . . . . . . . . . . .	32 Bit	 00000114 Para	  Public  'DATA'	
-_TEXT  . . . . . . . . . . . . .	32 Bit	 00000016 Para	  Public  'CODE'	
+_DATA  . . . . . . . . . . . . .	32 Bit	 0000011B Para	  Public  'DATA'	
+_TEXT  . . . . . . . . . . . . .	32 Bit	 000000DA Para	  Public  'CODE'	
 
 
 Procedures, parameters, and locals:
@@ -308,7 +371,7 @@ WriteStackFrame  . . . . . . . .	P Near	 00000000 FLAT	Length= 00000000 External
 WriteString  . . . . . . . . . .	P Near	 00000000 FLAT	Length= 00000000 External STDCALL
 WriteToFile  . . . . . . . . . .	P Near	 00000000 FLAT	Length= 00000000 External STDCALL
 WriteWindowsMsg  . . . . . . . .	P Near	 00000000 FLAT	Length= 00000000 External STDCALL
-main . . . . . . . . . . . . . .	P Near	 00000000 _TEXT	Length= 00000016 Public STDCALL
+main . . . . . . . . . . . . . .	P Near	 00000000 _TEXT	Length= 000000DA Public STDCALL
 printf . . . . . . . . . . . . .	P Near	 00000000 FLAT	Length= 00000000 External C
 scanf  . . . . . . . . . . . . .	P Near	 00000000 FLAT	Length= 00000000 External C
 wsprintfA  . . . . . . . . . . .	P Near	 00000000 FLAT	Length= 00000000 External C
@@ -528,7 +591,7 @@ VK_UP  . . . . . . . . . . . . .	Number	 00000026h
 WINDOW_BUFFER_SIZE_EVENT . . . .	Number	 00000004h   
 WriteConsoleOutputCharacter  . .	Text   	 WriteConsoleOutputCharacterA
 WriteConsole . . . . . . . . . .	Text   	 WriteConsoleA
-area . . . . . . . . . . . . . .	DWord	 000000F9 _DATA	
+area . . . . . . . . . . . . . .	DWord	 00000100 _DATA	
 black  . . . . . . . . . . . . .	Number	 00000000h   
 blue . . . . . . . . . . . . . .	Number	 00000001h   
 brown  . . . . . . . . . . . . .	Number	 00000006h   
@@ -544,16 +607,17 @@ lightGreen . . . . . . . . . . .	Number	 0000000Ah
 lightMagenta . . . . . . . . . .	Number	 0000000Dh   
 lightRed . . . . . . . . . . . .	Number	 0000000Ch   
 magenta  . . . . . . . . . . . .	Number	 00000005h   
-perim  . . . . . . . . . . . . .	DWord	 00000110 _DATA	
-prArea . . . . . . . . . . . . .	Byte	 000000DC _DATA	
+perim  . . . . . . . . . . . . .	DWord	 00000117 _DATA	
+prArea . . . . . . . . . . . . .	Byte	 000000E3 _DATA	
 prLen  . . . . . . . . . . . . .	Byte	 00000085 _DATA	
 prName . . . . . . . . . . . . .	Byte	 00000025 _DATA	
-prPerim  . . . . . . . . . . . .	Byte	 000000FD _DATA	
-prPlk  . . . . . . . . . . . . .	Byte	 000000B2 _DATA	
+prPerim  . . . . . . . . . . . .	Byte	 00000104 _DATA	
+prPlk  . . . . . . . . . . . . .	Byte	 000000B3 _DATA	
 prWidth  . . . . . . . . . . . .	Byte	 00000058 _DATA	
 red  . . . . . . . . . . . . . .	Number	 00000004h   
-usLen  . . . . . . . . . . . . .	DWord	 000000AE _DATA	
+usLen  . . . . . . . . . . . . .	DWord	 000000AF _DATA	
 usName . . . . . . . . . . . . .	Byte	 00000037 _DATA	
+usPlk  . . . . . . . . . . . . .	DWord	 000000DF _DATA	
 usWidth  . . . . . . . . . . . .	DWord	 00000081 _DATA	
 white  . . . . . . . . . . . . .	Number	 0000000Fh   
 wsprintf . . . . . . . . . . . .	Text   	 wsprintfA
