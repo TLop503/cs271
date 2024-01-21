@@ -25,6 +25,11 @@ PLANK_SIZE = 6
 	area	DWORD	?
 	prPerim	BYTE	"The perimiter is: ", 0
 	perim	DWORD	?
+	rails	DWORD	?
+	remain	DWORD	?
+	prRail1	BYTE	"You can make ", 0
+	prRail2	BYTE	" rails with ", 0
+	prRail3	BYTE	" leftover linear feet of wood", 0
 	
 	.code
 	main PROC
@@ -91,7 +96,30 @@ PLANK_SIZE = 6
 	mov eax, perim
 	call WriteDec
 	call Crlf
+	; 6 Calc number of rails and leftover
+	mov eax, usPlk		;perim
+	mov ebx, perim		;usPlk
+	mov edx, 0			; populate reg first
+	div ebx				; eax / ebx with results in eax, edx
+	mov rails, eax
+	mov remain, edx
 
+	; 7. Print results
+	mov edx, OFFSET prRail1
+	call WriteString
+
+	mov eax, rails
+	call WriteDec
+
+	mov edx, OFFSET prRail2
+	call WriteString
+
+	mov eax, remain
+	call WriteDec
+
+	mov edx, OFFSET prRail3
+	call WriteString
+	call Crlf
 
 
 
