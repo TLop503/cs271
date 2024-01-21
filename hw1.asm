@@ -30,6 +30,8 @@ PLANK_SIZE = 6
 	prRail1	BYTE	"You can make ", 0
 	prRail2	BYTE	" rails with ", 0
 	prRail3	BYTE	" leftover linear feet of wood", 0
+	prAgain	BYTE	"Would you like to do another calc? (0/1): ", 0
+	usAgain DWORD ?
 	
 	.code
 	main PROC
@@ -47,6 +49,10 @@ PLANK_SIZE = 6
 	mov		ecx, 32
 	call	ReadString
 	call	Crlf
+
+	; Start of calcs
+
+doCalcs:
 
 	; 3. Get pasture specs from user
 	mov		edx, OFFSET prWidth
@@ -96,6 +102,7 @@ PLANK_SIZE = 6
 	mov eax, perim
 	call WriteDec
 	call Crlf
+
 	; 6 Calc number of rails and leftover
 	mov eax, usPlk		;perim
 	mov ebx, perim		;usPlk
@@ -121,9 +128,23 @@ PLANK_SIZE = 6
 	call WriteString
 	call Crlf
 
+	; 8. Ask if want to run again
+	mov edx, OFFSET prAgain
+	call WriteString
+	call Crlf
+
+	call	ReadInt		;get input
+	mov		usAgain, eax
+	call	Crlf
+
+	; 8.1 check user input
+	cmp usAgain, '1'	
+	je doCalcs			;go to calcs if user said yes
+	cmp usAgain, '0'
+	je endProg
 
 
-
+endProg:
 	;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;
 	;from template
 	exit ; exit to operating system

@@ -1,4 +1,4 @@
-Microsoft (R) Macro Assembler Version 14.35.32216.1	    01/20/24 19:45:13
+Microsoft (R) Macro Assembler Version 14.35.32216.1	    01/20/24 20:00:10
 Assignment1 (hw1.asm					     Page 1 - 1
 
 
@@ -104,6 +104,16 @@ Microsoft (R) Macro Assembler Version 14.35.32216.1	    01/20/24 19:45:13
 	   72 20 66 65 65
 	   74 20 6F 66 20
 	   77 6F 6F 64 00
+ 0000015C 57 6F 75 6C 64		prAgain	BYTE	"Would you like to do another calc? (0/1): ", 0
+	   20 79 6F 75 20
+	   6C 69 6B 65 20
+	   74 6F 20 64 6F
+	   20 61 6E 6F 74
+	   68 65 72 20 63
+	   61 6C 63 3F 20
+	   28 30 2F 31 29
+	   3A 20 00
+ 00000187 00000000			usAgain DWORD ?
 					
  00000000				.code
  00000000				main PROC
@@ -121,6 +131,10 @@ Microsoft (R) Macro Assembler Version 14.35.32216.1	    01/20/24 19:45:13
  0000001E  B9 00000020			mov		ecx, 32
  00000023  E8 00000000 E		call	ReadString
  00000028  E8 00000000 E		call	Crlf
+
+					; Start of calcs
+
+ 0000002D			doCalcs:
 
 					; 3. Get pasture specs from user
  0000002D  BA 00000058 R		mov		edx, OFFSET prWidth
@@ -170,6 +184,7 @@ Microsoft (R) Macro Assembler Version 14.35.32216.1	    01/20/24 19:45:13
  000000C4  A1 00000117 R		mov eax, perim
  000000C9  E8 00000000 E		call WriteDec
  000000CE  E8 00000000 E		call Crlf
+
 					; 6 Calc number of rails and leftover
  000000D3  A1 000000DF R		mov eax, usPlk		;perim
  000000D8  8B 1D 00000117 R		mov ebx, perim		;usPlk
@@ -177,8 +192,6 @@ Microsoft (R) Macro Assembler Version 14.35.32216.1	    01/20/24 19:45:13
  000000E3  F7 F3			div ebx				; eax / ebx with results in eax, edx
  000000E5  A3 0000011B R		mov rails, eax
  000000EA  89 15 0000011F R		mov remain, edx
-
-
 
 					; 7. Print results
  000000F0  BA 00000123 R		mov edx, OFFSET prRail1
@@ -197,18 +210,33 @@ Microsoft (R) Macro Assembler Version 14.35.32216.1	    01/20/24 19:45:13
  0000011D  E8 00000000 E		call WriteString
  00000122  E8 00000000 E		call Crlf
 
+					; 8. Ask if want to run again
+ 00000127  BA 0000015C R		mov edx, OFFSET prAgain
+ 0000012C  E8 00000000 E		call WriteString
+ 00000131  E8 00000000 E		call Crlf
 
+ 00000136  E8 00000000 E		call	ReadInt		;get input
+ 0000013B  A3 00000187 R		mov		usAgain, eax
+ 00000140  E8 00000000 E		call	Crlf
 
+					; 8.1 check user input
+ 00000145  83 3D 00000187 R		cmp usAgain, '1'	
+	   31
+ 0000014C  0F 84 FFFFFEDB		je doCalcs			;go to calcs if user said yes
+ 00000152  83 3D 00000187 R		cmp usAgain, '0'
+	   30
+ 00000159  74 00			je endProg
 
+ 0000015B			endProg:
 					;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;
 					;from template
 					exit ; exit to operating system
- 00000127  6A 00	   *	    push   +000000000h
- 00000129  E8 00000000 E   *	    call   ExitProcess
- 0000012E			main ENDP
+ 0000015B  6A 00	   *	    push   +000000000h
+ 0000015D  E8 00000000 E   *	    call   ExitProcess
+ 00000162			main ENDP
 				; (insert additional procedures here)
 				END main
-Microsoft (R) Macro Assembler Version 14.35.32216.1	    01/20/24 19:45:13
+Microsoft (R) Macro Assembler Version 14.35.32216.1	    01/20/24 20:00:10
 Assignment1 (hw1.asm					     Symbols 2 - 1
 
 
@@ -302,8 +330,8 @@ Segments and Groups:
 
 FLAT . . . . . . . . . . . . . .	GROUP
 STACK  . . . . . . . . . . . . .	32 Bit	 00001000 Para	  Stack	  'STACK'	 
-_DATA  . . . . . . . . . . . . .	32 Bit	 0000015C Para	  Public  'DATA'	
-_TEXT  . . . . . . . . . . . . .	32 Bit	 0000012E Para	  Public  'CODE'	
+_DATA  . . . . . . . . . . . . .	32 Bit	 0000018B Para	  Public  'DATA'	
+_TEXT  . . . . . . . . . . . . .	32 Bit	 00000162 Para	  Public  'CODE'	
 
 
 Procedures, parameters, and locals:
@@ -410,7 +438,9 @@ WriteStackFrame  . . . . . . . .	P Near	 00000000 FLAT	Length= 00000000 External
 WriteString  . . . . . . . . . .	P Near	 00000000 FLAT	Length= 00000000 External STDCALL
 WriteToFile  . . . . . . . . . .	P Near	 00000000 FLAT	Length= 00000000 External STDCALL
 WriteWindowsMsg  . . . . . . . .	P Near	 00000000 FLAT	Length= 00000000 External STDCALL
-main . . . . . . . . . . . . . .	P Near	 00000000 _TEXT	Length= 0000012E Public STDCALL
+main . . . . . . . . . . . . . .	P Near	 00000000 _TEXT	Length= 00000162 Public STDCALL
+  doCalcs  . . . . . . . . . . .	L Near	 0000002D _TEXT	
+  endProg  . . . . . . . . . . .	L Near	 0000015B _TEXT	
 printf . . . . . . . . . . . . .	P Near	 00000000 FLAT	Length= 00000000 External C
 scanf  . . . . . . . . . . . . .	P Near	 00000000 FLAT	Length= 00000000 External C
 wsprintfA  . . . . . . . . . . .	P Near	 00000000 FLAT	Length= 00000000 External C
@@ -647,6 +677,7 @@ lightMagenta . . . . . . . . . .	Number	 0000000Dh
 lightRed . . . . . . . . . . . .	Number	 0000000Ch   
 magenta  . . . . . . . . . . . .	Number	 00000005h   
 perim  . . . . . . . . . . . . .	DWord	 00000117 _DATA	
+prAgain  . . . . . . . . . . . .	Byte	 0000015C _DATA	
 prArea . . . . . . . . . . . . .	Byte	 000000E3 _DATA	
 prLen  . . . . . . . . . . . . .	Byte	 00000085 _DATA	
 prName . . . . . . . . . . . . .	Byte	 00000025 _DATA	
@@ -659,6 +690,7 @@ prWidth  . . . . . . . . . . . .	Byte	 00000058 _DATA
 rails  . . . . . . . . . . . . .	DWord	 0000011B _DATA	
 red  . . . . . . . . . . . . . .	Number	 00000004h   
 remain . . . . . . . . . . . . .	DWord	 0000011F _DATA	
+usAgain  . . . . . . . . . . . .	DWord	 00000187 _DATA	
 usLen  . . . . . . . . . . . . .	DWord	 000000AF _DATA	
 usName . . . . . . . . . . . . .	Byte	 00000037 _DATA	
 usPlk  . . . . . . . . . . . . .	DWord	 000000DF _DATA	
