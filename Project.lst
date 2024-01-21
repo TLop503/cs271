@@ -1,4 +1,4 @@
-Microsoft (R) Macro Assembler Version 14.35.32216.1	    01/20/24 20:00:10
+Microsoft (R) Macro Assembler Version 14.35.32216.1	    01/20/24 20:10:17
 Assignment1 (hw1.asm					     Page 1 - 1
 
 
@@ -114,6 +114,8 @@ Microsoft (R) Macro Assembler Version 14.35.32216.1	    01/20/24 20:00:10
 	   28 30 2F 31 29
 	   3A 20 00
  00000187 00000000			usAgain DWORD ?
+ 0000018B 47 6F 6F 64 62		prExit	BYTE	"Goodbye ", 0
+	   79 65 20 00
 					
  00000000				.code
  00000000				main PROC
@@ -227,16 +229,25 @@ Microsoft (R) Macro Assembler Version 14.35.32216.1	    01/20/24 20:00:10
 	   30
  00000159  74 00			je endProg
 
+
  0000015B			endProg:
+					
+ 0000015B  BA 0000018B R		mov edx, OFFSET prExit
+ 00000160  E8 00000000 E		call WriteString
+					
+ 00000165  BA 00000037 R		mov edx, OFFSET usName
+ 0000016A  E8 00000000 E		call WriteString
+					
+
 					;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;
 					;from template
 					exit ; exit to operating system
- 0000015B  6A 00	   *	    push   +000000000h
- 0000015D  E8 00000000 E   *	    call   ExitProcess
- 00000162			main ENDP
+ 0000016F  6A 00	   *	    push   +000000000h
+ 00000171  E8 00000000 E   *	    call   ExitProcess
+ 00000176			main ENDP
 				; (insert additional procedures here)
 				END main
-Microsoft (R) Macro Assembler Version 14.35.32216.1	    01/20/24 20:00:10
+Microsoft (R) Macro Assembler Version 14.35.32216.1	    01/20/24 20:10:17
 Assignment1 (hw1.asm					     Symbols 2 - 1
 
 
@@ -330,8 +341,8 @@ Segments and Groups:
 
 FLAT . . . . . . . . . . . . . .	GROUP
 STACK  . . . . . . . . . . . . .	32 Bit	 00001000 Para	  Stack	  'STACK'	 
-_DATA  . . . . . . . . . . . . .	32 Bit	 0000018B Para	  Public  'DATA'	
-_TEXT  . . . . . . . . . . . . .	32 Bit	 00000162 Para	  Public  'CODE'	
+_DATA  . . . . . . . . . . . . .	32 Bit	 00000194 Para	  Public  'DATA'	
+_TEXT  . . . . . . . . . . . . .	32 Bit	 00000176 Para	  Public  'CODE'	
 
 
 Procedures, parameters, and locals:
@@ -438,7 +449,7 @@ WriteStackFrame  . . . . . . . .	P Near	 00000000 FLAT	Length= 00000000 External
 WriteString  . . . . . . . . . .	P Near	 00000000 FLAT	Length= 00000000 External STDCALL
 WriteToFile  . . . . . . . . . .	P Near	 00000000 FLAT	Length= 00000000 External STDCALL
 WriteWindowsMsg  . . . . . . . .	P Near	 00000000 FLAT	Length= 00000000 External STDCALL
-main . . . . . . . . . . . . . .	P Near	 00000000 _TEXT	Length= 00000162 Public STDCALL
+main . . . . . . . . . . . . . .	P Near	 00000000 _TEXT	Length= 00000176 Public STDCALL
   doCalcs  . . . . . . . . . . .	L Near	 0000002D _TEXT	
   endProg  . . . . . . . . . . .	L Near	 0000015B _TEXT	
 printf . . . . . . . . . . . . .	P Near	 00000000 FLAT	Length= 00000000 External C
@@ -679,6 +690,7 @@ magenta  . . . . . . . . . . . .	Number	 00000005h
 perim  . . . . . . . . . . . . .	DWord	 00000117 _DATA	
 prAgain  . . . . . . . . . . . .	Byte	 0000015C _DATA	
 prArea . . . . . . . . . . . . .	Byte	 000000E3 _DATA	
+prExit . . . . . . . . . . . . .	Byte	 0000018B _DATA	
 prLen  . . . . . . . . . . . . .	Byte	 00000085 _DATA	
 prName . . . . . . . . . . . . .	Byte	 00000025 _DATA	
 prPerim  . . . . . . . . . . . .	Byte	 00000104 _DATA	

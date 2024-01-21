@@ -32,6 +32,7 @@ PLANK_SIZE = 6
 	prRail3	BYTE	" leftover linear feet of wood", 0
 	prAgain	BYTE	"Would you like to do another calc? (0/1): ", 0
 	usAgain DWORD ?
+	prExit	BYTE	"Goodbye ", 0
 	
 	.code
 	main PROC
@@ -145,6 +146,14 @@ doCalcs:
 
 
 endProg:
+	
+	mov edx, OFFSET prExit
+	call WriteString
+	
+	mov edx, OFFSET usName
+	call WriteString
+	
+
 	;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;
 	;from template
 	exit ; exit to operating system
