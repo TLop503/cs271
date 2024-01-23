@@ -139,10 +139,9 @@ doCalcs:
 	call	Crlf
 
 	; 8.1 check user input
-	cmp usAgain, '1'	
-	je doCalcs			;go to calcs if user said yes
-	cmp usAgain, '0'
-	je endProg
+	cmp usAgain, 0		;Important, check against int, not char
+	jne doCalcs ; jump to doCalcs if usAgain is not equal to 0
+	je endProg  ; jump to endProg if usAgain is equal to 0
 
 
 endProg:
