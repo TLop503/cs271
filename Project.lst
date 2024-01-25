@@ -1,4 +1,4 @@
-Microsoft (R) Macro Assembler Version 14.35.32216.1	    01/23/24 10:57:27
+Microsoft (R) Macro Assembler Version 14.35.32216.1	    01/24/24 18:37:29
 Assignment1 (hw1.asm					     Page 1 - 1
 
 
@@ -7,6 +7,7 @@ Microsoft (R) Macro Assembler Version 14.35.32216.1	    01/23/24 10:57:27
 				; Troy Lopez
 				; CS 271 Assignment1		1/18/24
 				; Gets user input and does a bit of math for building a fence
+				; MUL and DIV are used, as well as some labels and logic for looping
 
 				INCLUDE Irvine32.inc
 			      C ; Include file for Irvine32.lib             (Irvine32.inc)
@@ -33,6 +34,12 @@ Microsoft (R) Macro Assembler Version 14.35.32216.1	    01/23/24 10:57:27
 
  00000000			.data
 					;variable definitions
+					;Notation:
+					; prThing is a string to be printed
+					; usThing is a user inputted value
+					; with the exception of intro, all values not prefixed by pr or us are the results of calcs
+
+
  00000000 48 77 31 3A 20		intro	BYTE	"Hw1: Fencing a pasture by Troy Lopez", 0
 	   46 65 6E 63 69
 	   6E 67 20 61 20
@@ -134,9 +141,7 @@ Microsoft (R) Macro Assembler Version 14.35.32216.1	    01/23/24 10:57:27
  00000023  E8 00000000 E		call	ReadString
  00000028  E8 00000000 E		call	Crlf
 
-					; Start of calcs
-
- 0000002D			doCalcs:
+ 0000002D			doCalcs:	; this is where math happens, and is jumped back to by the "play again" option
 
 					; 3. Get pasture specs from user
  0000002D  BA 00000058 R		mov		edx, OFFSET prWidth
@@ -178,7 +183,7 @@ Microsoft (R) Macro Assembler Version 14.35.32216.1	    01/23/24 10:57:27
  000000A8  03 05 00000081 R		add eax, usWidth
  000000AE  BB 00000002			mov ebx, 2			;perimiter = (l + w )*2
  000000B3  F7 E3			mul ebx
- 000000B5  A3 00000117 R		mov	perim, eax
+ 000000B5  A3 00000117 R		mov	perim, eax		;store results in perimiter var
 
  000000BA  BA 00000104 R		mov edx, OFFSET prPerim
  000000BF  E8 00000000 E		call WriteString
@@ -222,13 +227,13 @@ Microsoft (R) Macro Assembler Version 14.35.32216.1	    01/23/24 10:57:27
  00000140  E8 00000000 E		call	Crlf
 
 					; 8.1 check user input
- 00000145  83 3D 00000187 R		cmp usAgain, 0
+ 00000145  83 3D 00000187 R		cmp usAgain, 0		;Important, check against int, not char
 	   00
- 0000014C  0F 85 FFFFFEDB		jne doCalcs ; jump to doCalcs if usAgain is not equal to '0'
- 00000152  74 00			je endProg  ; jump to endProg if usAgain is equal to '0'
+ 0000014C  0F 85 FFFFFEDB		jne doCalcs ; jump to doCalcs if usAgain is not equal to 0
+ 00000152  74 00			je endProg  ; jump to endProg if usAgain is equal to 0
 
 
- 00000154			endProg:
+ 00000154			endProg:				; if the user doesn't want to do more calculations, say goodbye and quit
 					
  00000154  BA 0000018B R		mov edx, OFFSET prExit
  00000159  E8 00000000 E		call WriteString
@@ -245,7 +250,7 @@ Microsoft (R) Macro Assembler Version 14.35.32216.1	    01/23/24 10:57:27
  0000016F			main ENDP
 				; (insert additional procedures here)
 				END main
-Microsoft (R) Macro Assembler Version 14.35.32216.1	    01/23/24 10:57:27
+Microsoft (R) Macro Assembler Version 14.35.32216.1	    01/24/24 18:37:29
 Assignment1 (hw1.asm					     Symbols 2 - 1
 
 

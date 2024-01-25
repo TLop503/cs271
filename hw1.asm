@@ -3,6 +3,7 @@ TITLE Assignment1 (hw1.asm)
 ; Troy Lopez
 ; CS 271 Assignment1		1/18/24
 ; Gets user input and does a bit of math for building a fence
+; MUL and DIV are used, as well as some labels and logic for looping
 
 INCLUDE Irvine32.inc
 
@@ -12,6 +13,12 @@ PLANK_SIZE = 6
 
 .data
 	;variable definitions
+	;Notation:
+	; prThing is a string to be printed
+	; usThing is a user inputted value
+	; with the exception of intro, all values not prefixed by pr or us are the results of calcs
+
+
 	intro	BYTE	"Hw1: Fencing a pasture by Troy Lopez", 0
 	prName	BYTE	"Enter your name: ", 0
 	usName	BYTE	33 DUP(0)	;user inputted name initialized to zero
@@ -29,8 +36,8 @@ PLANK_SIZE = 6
 	remain	DWORD	?
 	prRail1	BYTE	"You can make ", 0
 	prRail2	BYTE	" rails with ", 0
-	prRail3	BYTE	" leftover linear feet of wood", 0
-	prAgain	BYTE	"Would you like to do another calc? (0/1): ", 0
+	prRail3	BYTE	" leftover linear feet of 1x6 wood boards", 0
+	prAgain	BYTE	"Would you like to do another calc? (0 = no / 1 = yes): ", 0
 	usAgain DWORD ?
 	prExit	BYTE	"Goodbye ", 0
 	
@@ -51,9 +58,7 @@ PLANK_SIZE = 6
 	call	ReadString
 	call	Crlf
 
-	; Start of calcs
-
-doCalcs:
+doCalcs:	; this is where math happens, and is jumped back to by the "play again" option
 
 	; 3. Get pasture specs from user
 	mov		edx, OFFSET prWidth
@@ -95,7 +100,7 @@ doCalcs:
 	add eax, usWidth
 	mov ebx, 2			;perimiter = (l + w )*2
 	mul ebx
-	mov	perim, eax
+	mov	perim, eax		;store results in perimiter var
 
 	mov edx, OFFSET prPerim
 	call WriteString
@@ -144,7 +149,7 @@ doCalcs:
 	je endProg  ; jump to endProg if usAgain is equal to 0
 
 
-endProg:
+endProg:				; if the user doesn't want to do more calculations, say goodbye and quit
 	
 	mov edx, OFFSET prExit
 	call WriteString
