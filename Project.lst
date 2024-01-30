@@ -1,13 +1,12 @@
-Microsoft (R) Macro Assembler Version 14.35.32216.1	    01/24/24 18:37:29
-Assignment1 (hw1.asm					     Page 1 - 1
+Microsoft (R) Macro Assembler Version 14.35.32216.1	    01/29/24 21:23:50
+Assignment2 (hw2.asm					     Page 1 - 1
 
 
-				TITLE Assignment1 (hw1.asm)
+				TITLE Assignment2 (hw2.asm)
 
 				; Troy Lopez
 				; CS 271 Assignment1		1/18/24
-				; Gets user input and does a bit of math for building a fence
-				; MUL and DIV are used, as well as some labels and logic for looping
+				; Gets user input and calculates factors
 
 				INCLUDE Irvine32.inc
 			      C ; Include file for Irvine32.lib             (Irvine32.inc)
@@ -28,230 +27,235 @@ Microsoft (R) Macro Assembler Version 14.35.32216.1	    01/24/24 18:37:29
 			      C .LIST
 			      C 
 
-				; Planks are 1x6'
- = 00000006			PLANK_SIZE = 6
+				; constants go here
+ = ": ",0			COLON	equ	": ",0
 
 
  00000000			.data
 					;variable definitions
-					;Notation:
+					; Notation:
 					; prThing is a string to be printed
 					; usThing is a user inputted value
 					; with the exception of intro, all values not prefixed by pr or us are the results of calcs
 
 
- 00000000 48 77 31 3A 20		intro	BYTE	"Hw1: Fencing a pasture by Troy Lopez", 0
-	   46 65 6E 63 69
-	   6E 67 20 61 20
-	   70 61 73 74 75
-	   72 65 20 62 79
-	   20 54 72 6F 79
-	   20 4C 6F 70 65
-	   7A 00
- 00000025 45 6E 74 65 72		prName	BYTE	"Enter your name: ", 0
+ 00000000 48 77 32 3A 20		intro1	BYTE	"Hw2: Factors, by Troy Lopez", 0
+	   46 61 63 74 6F
+	   72 73 2C 20 62
+	   79 20 54 72 6F
+	   79 20 4C 6F 70
+	   65 7A 00
+ 0000001C 54 68 69 73 20		intro2	BYTE	"This program calculates and displays the factors of numbers between upper and lower bounds, as well as when numbers are prime.", 0
+	   70 72 6F 67 72
+	   61 6D 20 63 61
+	   6C 63 75 6C 61
+	   74 65 73 20 61
+	   6E 64 20 64 69
+	   73 70 6C 61 79
+	   73 20 74 68 65
+	   20 66 61 63 74
+	   6F 72 73 20 6F
+	   66 20 6E 75 6D
+	   62 65 72 73 20
+	   62 65 74 77 65
+	   65 6E 20 75 70
+	   70 65 72 20 61
+	   6E 64 20 6C 6F
+	   77 65 72 20 62
+	   6F 75 6E 64 73
+	   2C 20 61 73 20
+	   77 65 6C 6C 20
+	   61 73 20 77 68
+	   65 6E 20 6E 75
+	   6D 62 65 72 73
+	   20 61 72 65 20
+	   70 72 69 6D 65
+	   2E 00
+ 0000009B 45 6E 74 65 72		prName	BYTE	"Enter your name: ", 0
 	   20 79 6F 75 72
 	   20 6E 61 6D 65
 	   3A 20 00
- 00000037  00000021 [			usName	BYTE	33 DUP(0)	;user inputted name initialized to zero
-	    00
-	   ]
- 00000058 45 6E 74 65 72		prWidth	BYTE	"Enter the width of the pasture in feet: ", 0
-	   20 74 68 65 20
-	   77 69 64 74 68
-	   20 6F 66 20 74
-	   68 65 20 70 61
-	   73 74 75 72 65
-	   20 69 6E 20 66
-	   65 65 74 3A 20
-	   00
- 00000081 00000000			usWidth	DWORD	?	;input
- 00000085 45 6E 74 65 72		prLen	BYTE	"Enter the length of the pasture in feet: ", 0
-	   20 74 68 65 20
-	   6C 65 6E 67 74
-	   68 20 6F 66 20
-	   74 68 65 20 70
-	   61 73 74 75 72
-	   65 20 69 6E 20
-	   66 65 65 74 3A
+ 000000AD 45 6E 74 65 72		prLowr	BYTE	"Enter a number betwen 1 and 1000 for the lower range: ", 0
+	   20 61 20 6E 75
+	   6D 62 65 72 20
+	   62 65 74 77 65
+	   6E 20 31 20 61
+	   6E 64 20 31 30
+	   30 30 20 66 6F
+	   72 20 74 68 65
+	   20 6C 6F 77 65
+	   72 20 72 61 6E
+	   67 65 3A 20 00
+ 000000E4 45 6E 74 65 72		prHigh	BYTE	"Enter a number between 1 and 1000 for the higher range: ", 0
+	   20 61 20 6E 75
+	   6D 62 65 72 20
+	   62 65 74 77 65
+	   65 6E 20 31 20
+	   61 6E 64 20 31
+	   30 30 30 20 66
+	   6F 72 20 74 68
+	   65 20 68 69 67
+	   68 65 72 20 72
+	   61 6E 67 65 3A
 	   20 00
- 000000AF 00000000			usLen	DWORD	?	;input
- 000000B3 45 6E 74 65 72		prPlk	BYTE	"Enter the linear feet of planks availible: ", 0
-	   20 74 68 65 20
-	   6C 69 6E 65 61
-	   72 20 66 65 65
-	   74 20 6F 66 20
-	   70 6C 61 6E 6B
-	   73 20 61 76 61
-	   69 6C 69 62 6C
-	   65 3A 20 00
- 000000DF 00000000			usPlk	DWORd	?	;input
- 000000E3 54 68 65 20 61		prArea	BYTE	"The area of the pasture is: ", 0
-	   72 65 61 20 6F
-	   66 20 74 68 65
-	   20 70 61 73 74
-	   75 72 65 20 69
-	   73 3A 20 00
- 00000100 00000000			area	DWORD	?
- 00000104 54 68 65 20 70		prPerim	BYTE	"The perimiter is: ", 0
-	   65 72 69 6D 69
-	   74 65 72 20 69
-	   73 3A 20 00
- 00000117 00000000			perim	DWORD	?
- 0000011B 00000000			rails	DWORD	?
- 0000011F 00000000			remain	DWORD	?
- 00000123 59 6F 75 20 63		prRail1	BYTE	"You can make ", 0
-	   61 6E 20 6D 61
-	   6B 65 20 00
- 00000131 20 72 61 69 6C		prRail2	BYTE	" rails with ", 0
-	   73 20 77 69 74
-	   68 20 00
- 0000013E 20 6C 65 66 74		prRail3	BYTE	" leftover linear feet of wood", 0
-	   6F 76 65 72 20
-	   6C 69 6E 65 61
-	   72 20 66 65 65
-	   74 20 6F 66 20
-	   77 6F 6F 64 00
- 0000015C 57 6F 75 6C 64		prAgain	BYTE	"Would you like to do another calc? (0/1): ", 0
+ 0000011D 57 6F 75 6C 64		prAgin	BYTE	"Would you like to do another calculation? (1 yes/0 no)", 0
 	   20 79 6F 75 20
 	   6C 69 6B 65 20
 	   74 6F 20 64 6F
 	   20 61 6E 6F 74
 	   68 65 72 20 63
-	   61 6C 63 3F 20
-	   28 30 2F 31 29
-	   3A 20 00
- 00000187 00000000			usAgain DWORD ?
- 0000018B 47 6F 6F 64 62		prExit	BYTE	"Goodbye ", 0
-	   79 65 20 00
-					
- 00000000				.code
+	   61 6C 63 75 6C
+	   61 74 69 6F 6E
+	   3F 20 28 31 20
+	   79 65 73 2F 30
+	   20 6E 6F 29 00
+ 00000154 53 6F 72 72 79		prLoLo	BYTE	"Sorry, that value is too low, please try again", 0
+	   2C 20 74 68 61
+	   74 20 76 61 6C
+	   75 65 20 69 73
+	   20 74 6F 6F 20
+	   6C 6F 77 2C 20
+	   70 6C 65 61 73
+	   65 20 74 72 79
+	   20 61 67 61 69
+	   6E 00
+ 00000183 53 6F 72 72 79		prHiLo	BYTE	"Sorry, that value is too high, please try again", 0
+	   2C 20 74 68 61
+	   74 20 76 61 6C
+	   75 65 20 69 73
+	   20 74 6F 6F 20
+	   68 69 67 68 2C
+	   20 70 6C 65 61
+	   73 65 20 74 72
+	   79 20 61 67 61
+	   69 6E 00
+ 000001B3 49 6E 70 75 74		prLoHi	BYTE	"Input must be >= lower bound, please try again", 0
+	   20 6D 75 73 74
+	   20 62 65 20 3E
+	   3D 20 6C 6F 77
+	   65 72 20 62 6F
+	   75 6E 64 2C 20
+	   70 6C 65 61 73
+	   65 20 74 72 79
+	   20 61 67 61 69
+	   6E 00
+
+ 000001E2  00000021 [			usName	BYTE	33	DUP(0)
+	    00
+	   ]
+ 00000203 00000000			usLowr	DWORD	?
+ 00000207 00000000			usHigh	DWORD	?
+
+ 00000000			.code
  00000000				main PROC
 
-					; 1. Introduce program
- 00000000  BA 00000000 R		mov		edx, OFFSET intro
+					;intro program
+ 00000000  BA 00000000 R		mov		edx, OFFSET intro1
  00000005  E8 00000000 E		call	WriteString
- 0000000A  E8 00000000 E		call	Crlf		;newline
-
-					; 2. Get user's name
- 0000000F  BA 00000025 R		mov		edx, OFFSET prName
+ 0000000A  E8 00000000 E		call	Crlf
+ 0000000F  BA 0000001C R		mov		edx, OFFSET intro2
  00000014  E8 00000000 E		call	WriteString
+ 00000019  E8 00000000 E		call	Crlf
 
- 00000019  BA 00000037 R		mov		edx, OFFSET usName
- 0000001E  B9 00000020			mov		ecx, 32
- 00000023  E8 00000000 E		call	ReadString
- 00000028  E8 00000000 E		call	Crlf
-
- 0000002D			doCalcs:	; this is where math happens, and is jumped back to by the "play again" option
-
-					; 3. Get pasture specs from user
- 0000002D  BA 00000058 R		mov		edx, OFFSET prWidth
- 00000032  E8 00000000 E		call	WriteString
-
- 00000037  E8 00000000 E		call	ReadInt		;stores in eax
- 0000003C  A3 00000081 R		mov		usWidth, eax
- 00000041  E8 00000000 E		call	Crlf
-
- 00000046  BA 00000085 R		mov		edx, OFFSET prLen
- 0000004B  E8 00000000 E		call	WriteString
-
- 00000050  E8 00000000 E		call	ReadInt
- 00000055  A3 000000AF R		mov		usLen, eax
- 0000005A  E8 00000000 E		call	Crlf
-
- 0000005F  BA 000000B3 R		mov		edx, OFFSET prPlk
- 00000064  E8 00000000 E		call	WriteString
-
- 00000069  E8 00000000 E		call	ReadInt
- 0000006E  A3 000000DF R		mov		usPlk, eax
- 00000073  E8 00000000 E		call	Crlf
-
-					; 4. Do calcs for area
- 00000078  A1 000000AF R		mov eax, usLen		;factor1
- 0000007D  8B 1D 00000081 R		mov ebx, usWidth	;factor2
- 00000083  F7 E3			mul ebx				;eax * ebx, stored in eax
- 00000085  A3 00000100 R		mov area, eax
-
- 0000008A  BA 000000E3 R		mov edx, OFFSET prArea
- 0000008F  E8 00000000 E		call WriteString
+					;get name
+ 0000001E  BA 0000009B R		mov		edx, OFFSET prName
+ 00000023  E8 00000000 E		call	WriteString
 					
- 00000094  A1 00000100 R		mov eax, area
- 00000099  E8 00000000 E		call WriteDec		;print eax (area)
- 0000009E  E8 00000000 E		call Crlf
+ 00000028  BA 000001E2 R		mov		edx, OFFSET usName
+ 0000002D  B9 00000020			mov		ecx, 32
+ 00000032  E8 00000000 E		call	ReadString
+ 00000037  E8 00000000 E		call	Crlf
 
-					; 5. Do calcs for perimiter
- 000000A3  A1 000000AF R		mov eax, usLen	
- 000000A8  03 05 00000081 R		add eax, usWidth
- 000000AE  BB 00000002			mov ebx, 2			;perimiter = (l + w )*2
- 000000B3  F7 E3			mul ebx
- 000000B5  A3 00000117 R		mov	perim, eax		;store results in perimiter var
 
- 000000BA  BA 00000104 R		mov edx, OFFSET prPerim
- 000000BF  E8 00000000 E		call WriteString
+					; get lower bound
+ 0000003C			getLower:
+ 0000003C  BA 000000AD R		mov		edx, OFFSET prLowr
+ 00000041  E8 00000000 E		call	WriteString
 					
- 000000C4  A1 00000117 R		mov eax, perim
- 000000C9  E8 00000000 E		call WriteDec
- 000000CE  E8 00000000 E		call Crlf
-
-					; 6 Calc number of rails and leftover
- 000000D3  A1 000000DF R		mov eax, usPlk		;perim
- 000000D8  8B 1D 00000117 R		mov ebx, perim		;usPlk
- 000000DE  BA 00000000			mov edx, 0			; populate reg first
- 000000E3  F7 F3			div ebx				; eax / ebx with results in eax, edx
- 000000E5  A3 0000011B R		mov rails, eax
- 000000EA  89 15 0000011F R		mov remain, edx
-
-					; 7. Print results
- 000000F0  BA 00000123 R		mov edx, OFFSET prRail1
- 000000F5  E8 00000000 E		call WriteString
-
- 000000FA  A1 0000011B R		mov eax, rails
- 000000FF  E8 00000000 E		call WriteDec
-
- 00000104  BA 00000131 R		mov edx, OFFSET prRail2
- 00000109  E8 00000000 E		call WriteString
-
- 0000010E  A1 0000011F R		mov eax, remain
- 00000113  E8 00000000 E		call WriteDec
-
- 00000118  BA 0000013E R		mov edx, OFFSET prRail3
- 0000011D  E8 00000000 E		call WriteString
- 00000122  E8 00000000 E		call Crlf
-
-					; 8. Ask if want to run again
- 00000127  BA 0000015C R		mov edx, OFFSET prAgain
- 0000012C  E8 00000000 E		call WriteString
- 00000131  E8 00000000 E		call Crlf
-
- 00000136  E8 00000000 E		call	ReadInt		;get input
- 0000013B  A3 00000187 R		mov		usAgain, eax
- 00000140  E8 00000000 E		call	Crlf
-
-					; 8.1 check user input
- 00000145  83 3D 00000187 R		cmp usAgain, 0		;Important, check against int, not char
+ 00000046  E8 00000000 E		call	ReadInt				;stores in eax
+ 0000004B  A3 00000203 R		mov		usLowr, eax
+ 00000050  E8 00000000 E		call	crlf
+					
+					; check if too low
+ 00000055  83 3D 00000203 R		cmp		usLowr, 0
 	   00
- 0000014C  0F 85 FFFFFEDB		jne doCalcs ; jump to doCalcs if usAgain is not equal to 0
- 00000152  74 00			je endProg  ; jump to endProg if usAgain is equal to 0
+ 0000005C  7E 0E			jle		lowerTooLow			; if 0 or below
+					
+ 0000005E  81 3D 00000203 R		cmp		usLowr, 1001
+	   000003E9
+ 00000068  7D 13			jge		lowerTooHigh
+ 0000006A  EB 22			jmp getHigher
 
 
- 00000154			endProg:				; if the user doesn't want to do more calculations, say goodbye and quit
+					; if user input for lower bound is too low
+ 0000006C			lowerTooLow:
+ 0000006C  BA 00000154 R		mov		edx, OFFSET	prLoLo
+ 00000071  E8 00000000 E		call	WriteString
+ 00000076  E8 00000000 E		call	Crlf
+ 0000007B  EB BF			jmp		getLower
+
+
+					; if too high
+ 0000007D			lowerTooHigh:
+ 0000007D  BA 00000183 R		mov		edx, OFFSET prHiLo
+ 00000082  E8 00000000 E		call	WriteString
+ 00000087  E8 00000000 E		call	Crlf
+ 0000008C  EB AE			jmp		getLower
+
+					; get higher bound
+ 0000008E			getHigher:
+ 0000008E  BA 000000E4 R		mov		edx, OFFSET prHigh
+ 00000093  E8 00000000 E		call	WriteString
 					
- 00000154  BA 0000018B R		mov edx, OFFSET prExit
- 00000159  E8 00000000 E		call WriteString
+ 00000098  E8 00000000 E		call	ReadInt				;stores in eax
+ 0000009D  A3 00000207 R		mov		usHigh, eax
+ 000000A2  E8 00000000 E		call	crlf
 					
- 0000015E  BA 00000037 R		mov edx, OFFSET usName
- 00000163  E8 00000000 E		call WriteString
+					; check if too low
+ 000000A7  A1 00000203 R		mov		eax, usLowr
+ 000000AC  39 05 00000207 R		cmp		usHigh, eax
+ 000000B2  7E 0E			jle		higherToolow		; if 0 or below
+					
+ 000000B4  81 3D 00000207 R		cmp		usHigh, 1001
+	   000003E9
+ 000000BE  7D 13			jge		higherTooHigh
+ 000000C0  EB 22			jmp doMath
+
+
+					; if user input for lower bound is too low
+ 000000C2			higherTooLow:
+ 000000C2  BA 000001B3 R		mov		edx, OFFSET	prLoHi
+ 000000C7  E8 00000000 E		call	WriteString
+ 000000CC  E8 00000000 E		call	Crlf
+ 000000D1  EB BB			jmp		getHigher
+
+
+					; if too high
+ 000000D3			higherTooHigh:
+ 000000D3  BA 00000183 R		mov		edx, OFFSET prHiLo	;reuse message from too low
+ 000000D8  E8 00000000 E		call	WriteString
+ 000000DD  E8 00000000 E		call	Crlf
+ 000000E2  EB AA			jmp		getHigher
+
+
+					;start calcs
+ 000000E4			doMath:
+
+
+ 000000E4			endProg:						; if the user doesn't want to do more calculations, say goodbye and quit
+					
 					
 
 					;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;
 					;from template
 					exit ; exit to operating system
- 00000168  6A 00	   *	    push   +000000000h
- 0000016A  E8 00000000 E   *	    call   ExitProcess
- 0000016F			main ENDP
+ 000000E4  6A 00	   *	    push   +000000000h
+ 000000E6  E8 00000000 E   *	    call   ExitProcess
+ 000000EB			main ENDP
 				; (insert additional procedures here)
 				END main
-Microsoft (R) Macro Assembler Version 14.35.32216.1	    01/24/24 18:37:29
-Assignment1 (hw1.asm					     Symbols 2 - 1
+Microsoft (R) Macro Assembler Version 14.35.32216.1	    01/29/24 21:23:50
+Assignment2 (hw2.asm					     Symbols 2 - 1
 
 
 
@@ -344,8 +348,8 @@ Segments and Groups:
 
 FLAT . . . . . . . . . . . . . .	GROUP
 STACK  . . . . . . . . . . . . .	32 Bit	 00001000 Para	  Stack	  'STACK'	 
-_DATA  . . . . . . . . . . . . .	32 Bit	 00000194 Para	  Public  'DATA'	
-_TEXT  . . . . . . . . . . . . .	32 Bit	 0000016F Para	  Public  'CODE'	
+_DATA  . . . . . . . . . . . . .	32 Bit	 0000020B Para	  Public  'DATA'	
+_TEXT  . . . . . . . . . . . . .	32 Bit	 000000EB Para	  Public  'CODE'	
 
 
 Procedures, parameters, and locals:
@@ -452,9 +456,15 @@ WriteStackFrame  . . . . . . . .	P Near	 00000000 FLAT	Length= 00000000 External
 WriteString  . . . . . . . . . .	P Near	 00000000 FLAT	Length= 00000000 External STDCALL
 WriteToFile  . . . . . . . . . .	P Near	 00000000 FLAT	Length= 00000000 External STDCALL
 WriteWindowsMsg  . . . . . . . .	P Near	 00000000 FLAT	Length= 00000000 External STDCALL
-main . . . . . . . . . . . . . .	P Near	 00000000 _TEXT	Length= 0000016F Public STDCALL
-  doCalcs  . . . . . . . . . . .	L Near	 0000002D _TEXT	
-  endProg  . . . . . . . . . . .	L Near	 00000154 _TEXT	
+main . . . . . . . . . . . . . .	P Near	 00000000 _TEXT	Length= 000000EB Public STDCALL
+  getLower . . . . . . . . . . .	L Near	 0000003C _TEXT	
+  lowerTooLow  . . . . . . . . .	L Near	 0000006C _TEXT	
+  lowerTooHigh . . . . . . . . .	L Near	 0000007D _TEXT	
+  getHigher  . . . . . . . . . .	L Near	 0000008E _TEXT	
+  higherTooLow . . . . . . . . .	L Near	 000000C2 _TEXT	
+  higherTooHigh  . . . . . . . .	L Near	 000000D3 _TEXT	
+  doMath . . . . . . . . . . . .	L Near	 000000E4 _TEXT	
+  endProg  . . . . . . . . . . .	L Near	 000000E4 _TEXT	
 printf . . . . . . . . . . . . .	P Near	 00000000 FLAT	Length= 00000000 External C
 scanf  . . . . . . . . . . . . .	P Near	 00000000 FLAT	Length= 00000000 External C
 wsprintfA  . . . . . . . . . . .	P Near	 00000000 FLAT	Length= 00000000 External C
@@ -475,6 +485,7 @@ Symbols:
 @stack . . . . . . . . . . . . .	Text   	 FLAT
 ALT_MASK . . . . . . . . . . . .	Number	 00000003h   
 CAPSLOCK_ON  . . . . . . . . . .	Number	 00000080h   
+COLON  . . . . . . . . . . . . .	Text   	 ": ",0
 CREATE_ALWAYS  . . . . . . . . .	Number	 00000002h   
 CREATE_NEW . . . . . . . . . . .	Number	 00000001h   
 CTRL_MASK  . . . . . . . . . . .	Number	 0000000Ch   
@@ -577,7 +588,6 @@ NULL . . . . . . . . . . . . . .	Number	 00000000h
 NUMLOCK_ON . . . . . . . . . . .	Number	 00000020h   
 OPEN_ALWAYS  . . . . . . . . . .	Number	 00000004h   
 OPEN_EXISTING  . . . . . . . . .	Number	 00000003h   
-PLANK_SIZE . . . . . . . . . . .	Number	 00000006h   
 PeekConsoleInput . . . . . . . .	Text   	 PeekConsoleInputA
 RIGHT_ALT_PRESSED  . . . . . . .	Number	 00000001h   
 RIGHT_CTRL_PRESSED . . . . . . .	Number	 00000004h   
@@ -674,7 +684,6 @@ VK_UP  . . . . . . . . . . . . .	Number	 00000026h
 WINDOW_BUFFER_SIZE_EVENT . . . .	Number	 00000004h   
 WriteConsoleOutputCharacter  . .	Text   	 WriteConsoleOutputCharacterA
 WriteConsole . . . . . . . . . .	Text   	 WriteConsoleA
-area . . . . . . . . . . . . . .	DWord	 00000100 _DATA	
 black  . . . . . . . . . . . . .	Number	 00000000h   
 blue . . . . . . . . . . . . . .	Number	 00000001h   
 brown  . . . . . . . . . . . . .	Number	 00000006h   
@@ -682,7 +691,8 @@ cyan . . . . . . . . . . . . . .	Number	 00000003h
 exit . . . . . . . . . . . . . .	Text   	 INVOKE ExitProcess,0
 gray . . . . . . . . . . . . . .	Number	 00000008h   
 green  . . . . . . . . . . . . .	Number	 00000002h   
-intro  . . . . . . . . . . . . .	Byte	 00000000 _DATA	
+intro1 . . . . . . . . . . . . .	Byte	 00000000 _DATA	
+intro2 . . . . . . . . . . . . .	Byte	 0000001C _DATA	
 lightBlue  . . . . . . . . . . .	Number	 00000009h   
 lightCyan  . . . . . . . . . . .	Number	 0000000Bh   
 lightGray  . . . . . . . . . . .	Number	 00000007h   
@@ -690,26 +700,17 @@ lightGreen . . . . . . . . . . .	Number	 0000000Ah
 lightMagenta . . . . . . . . . .	Number	 0000000Dh   
 lightRed . . . . . . . . . . . .	Number	 0000000Ch   
 magenta  . . . . . . . . . . . .	Number	 00000005h   
-perim  . . . . . . . . . . . . .	DWord	 00000117 _DATA	
-prAgain  . . . . . . . . . . . .	Byte	 0000015C _DATA	
-prArea . . . . . . . . . . . . .	Byte	 000000E3 _DATA	
-prExit . . . . . . . . . . . . .	Byte	 0000018B _DATA	
-prLen  . . . . . . . . . . . . .	Byte	 00000085 _DATA	
-prName . . . . . . . . . . . . .	Byte	 00000025 _DATA	
-prPerim  . . . . . . . . . . . .	Byte	 00000104 _DATA	
-prPlk  . . . . . . . . . . . . .	Byte	 000000B3 _DATA	
-prRail1  . . . . . . . . . . . .	Byte	 00000123 _DATA	
-prRail2  . . . . . . . . . . . .	Byte	 00000131 _DATA	
-prRail3  . . . . . . . . . . . .	Byte	 0000013E _DATA	
-prWidth  . . . . . . . . . . . .	Byte	 00000058 _DATA	
-rails  . . . . . . . . . . . . .	DWord	 0000011B _DATA	
+prAgin . . . . . . . . . . . . .	Byte	 0000011D _DATA	
+prHiLo . . . . . . . . . . . . .	Byte	 00000183 _DATA	
+prHigh . . . . . . . . . . . . .	Byte	 000000E4 _DATA	
+prLoHi . . . . . . . . . . . . .	Byte	 000001B3 _DATA	
+prLoLo . . . . . . . . . . . . .	Byte	 00000154 _DATA	
+prLowr . . . . . . . . . . . . .	Byte	 000000AD _DATA	
+prName . . . . . . . . . . . . .	Byte	 0000009B _DATA	
 red  . . . . . . . . . . . . . .	Number	 00000004h   
-remain . . . . . . . . . . . . .	DWord	 0000011F _DATA	
-usAgain  . . . . . . . . . . . .	DWord	 00000187 _DATA	
-usLen  . . . . . . . . . . . . .	DWord	 000000AF _DATA	
-usName . . . . . . . . . . . . .	Byte	 00000037 _DATA	
-usPlk  . . . . . . . . . . . . .	DWord	 000000DF _DATA	
-usWidth  . . . . . . . . . . . .	DWord	 00000081 _DATA	
+usHigh . . . . . . . . . . . . .	DWord	 00000207 _DATA	
+usLowr . . . . . . . . . . . . .	DWord	 00000203 _DATA	
+usName . . . . . . . . . . . . .	Byte	 000001E2 _DATA	
 white  . . . . . . . . . . . . .	Number	 0000000Fh   
 wsprintf . . . . . . . . . . . .	Text   	 wsprintfA
 yellow . . . . . . . . . . . . .	Number	 0000000Eh   
