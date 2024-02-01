@@ -1,11 +1,11 @@
-Microsoft (R) Macro Assembler Version 14.35.32216.1	    02/01/24 15:12:00
+Microsoft (R) Macro Assembler Version 14.35.32216.1	    02/01/24 15:42:59
 Assignment2 (hw2.asm					     Page 1 - 1
 
 
 				TITLE Assignment2 (hw2.asm)
 
 				; Troy Lopez
-				; CS 271 Assignment1     1/18/24
+				; CS 271 Assignment1     2/1/24
 				; Gets user input and calculates factors
 
 				INCLUDE Irvine32.inc
@@ -28,7 +28,6 @@ Microsoft (R) Macro Assembler Version 14.35.32216.1	    02/01/24 15:12:00
 			      C 
 
 				; constants go here
-				;COLON   equ ": ",0
  = 000003E9			LIM     equ 1001    ; 1001 so check can be inclusive
 
  00000000			.data
@@ -36,7 +35,6 @@ Microsoft (R) Macro Assembler Version 14.35.32216.1	    02/01/24 15:12:00
 				    ; Notation:
 				    ; prThing is a string to be printed
 				    ; usThing is a user inputted value
-				    ; with the exception of intro, all values not prefixed by pr or us are the results of calcs
 
  00000000 48 77 32 3A 20	    intro1  BYTE "Hw2: Factors, by Troy Lopez", 0
 	   46 61 63 74 6F
@@ -171,6 +169,7 @@ Microsoft (R) Macro Assembler Version 14.35.32216.1	    02/01/24 15:12:00
  0000026A 3A 20 00		    colon   BYTE ": ",0
  0000026D 20 00			    space   BYTE " ",0
  0000026F 0000			    flag    WORD 0
+
 
  00000000			.code
  00000000			main PROC
@@ -348,22 +347,40 @@ Microsoft (R) Macro Assembler Version 14.35.32216.1	    02/01/24 15:12:00
 
  000001BC  E9 FFFFFF38		    jmp     forLoop
 
-				    
-
-
+				 
+				    ;jump out of program, ask about going again
  000001C1			continue:
+ 000001C1  BA 000001F8 R	    mov edx, OFFSET prAgain
+ 000001C6  E8 00000000 E		call WriteString
+ 000001CB  E8 00000000 E		call Crlf
 
- 000001C1			endProg:
+ 000001D0  E8 00000000 E		call	ReadInt		;get input
+ 000001D5  A3 00000262 R		mov		usAgain, eax
+ 000001DA  E8 00000000 E		call	Crlf
+
+					; 8.1 check user input
+ 000001DF  83 3D 00000262 R		cmp usAgain, 0		;Important, check against int, not char
+	   00
+ 000001E6  0F 85 FFFFFE50		jne getLower ; jump to doCalcs if usAgain is not equal to 0
+ 000001EC  74 00			je endProg  ; jump to endProg if usAgain is equal to 0
+
+
+ 000001EE			endProg:
+ 000001EE  BA 00000230 R		mov edx, OFFSET prExit
+ 000001F3  E8 00000000 E		call WriteString
+					
+ 000001F8  BA 00000239 R		mov edx, OFFSET usName
+ 000001FD  E8 00000000 E		call WriteString
 
 				    ; from template
 				    exit ; exit to operating system
- 000001C1  6A 00	   *	    push   +000000000h
- 000001C3  E8 00000000 E   *	    call   ExitProcess
- 000001C8			main ENDP
+ 00000202  6A 00	   *	    push   +000000000h
+ 00000204  E8 00000000 E   *	    call   ExitProcess
+ 00000209			main ENDP
 
 				; (insert additional procedures here)
 				END main
-Microsoft (R) Macro Assembler Version 14.35.32216.1	    02/01/24 15:12:00
+Microsoft (R) Macro Assembler Version 14.35.32216.1	    02/01/24 15:42:59
 Assignment2 (hw2.asm					     Symbols 2 - 1
 
 
@@ -458,7 +475,7 @@ Segments and Groups:
 FLAT . . . . . . . . . . . . . .	GROUP
 STACK  . . . . . . . . . . . . .	32 Bit	 00001000 Para	  Stack	  'STACK'	 
 _DATA  . . . . . . . . . . . . .	32 Bit	 00000271 Para	  Public  'DATA'	
-_TEXT  . . . . . . . . . . . . .	32 Bit	 000001C8 Para	  Public  'CODE'	
+_TEXT  . . . . . . . . . . . . .	32 Bit	 00000209 Para	  Public  'CODE'	
 
 
 Procedures, parameters, and locals:
@@ -565,7 +582,7 @@ WriteStackFrame  . . . . . . . .	P Near	 00000000 FLAT	Length= 00000000 External
 WriteString  . . . . . . . . . .	P Near	 00000000 FLAT	Length= 00000000 External STDCALL
 WriteToFile  . . . . . . . . . .	P Near	 00000000 FLAT	Length= 00000000 External STDCALL
 WriteWindowsMsg  . . . . . . . .	P Near	 00000000 FLAT	Length= 00000000 External STDCALL
-main . . . . . . . . . . . . . .	P Near	 00000000 _TEXT	Length= 000001C8 Public STDCALL
+main . . . . . . . . . . . . . .	P Near	 00000000 _TEXT	Length= 00000209 Public STDCALL
   getLower . . . . . . . . . . .	L Near	 0000003C _TEXT	
   lowerTooLow  . . . . . . . . .	L Near	 0000006C _TEXT	
   lowerTooHigh . . . . . . . . .	L Near	 0000007D _TEXT	
@@ -579,7 +596,7 @@ main . . . . . . . . . . . . . .	P Near	 00000000 _TEXT	Length= 000001C8 Public 
   printFactor  . . . . . . . . .	L Near	 00000179 _TEXT	
   printPrime . . . . . . . . . .	L Near	 0000019E _TEXT	
   continue . . . . . . . . . . .	L Near	 000001C1 _TEXT	
-  endProg  . . . . . . . . . . .	L Near	 000001C1 _TEXT	
+  endProg  . . . . . . . . . . .	L Near	 000001EE _TEXT	
 printf . . . . . . . . . . . . .	P Near	 00000000 FLAT	Length= 00000000 External C
 scanf  . . . . . . . . . . . . .	P Near	 00000000 FLAT	Length= 00000000 External C
 wsprintfA  . . . . . . . . . . .	P Near	 00000000 FLAT	Length= 00000000 External C

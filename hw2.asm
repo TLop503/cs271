@@ -1,13 +1,12 @@
 TITLE Assignment2 (hw2.asm)
 
 ; Troy Lopez
-; CS 271 Assignment1     1/18/24
-; Gets user input and calculates factors
+; CS 271 Assignment1     2/1/24
+; Gets user input and calculates factors. Exercises understanding of control flow with psuedo-loops
 
 INCLUDE Irvine32.inc
 
 ; constants go here
-;COLON   equ ": ",0
 LIM     equ 1001    ; 1001 so check can be inclusive
 
 .data
@@ -15,7 +14,6 @@ LIM     equ 1001    ; 1001 so check can be inclusive
     ; Notation:
     ; prThing is a string to be printed
     ; usThing is a user inputted value
-    ; with the exception of intro, all values not prefixed by pr or us are the results of calcs
 
     intro1  BYTE "Hw2: Factors, by Troy Lopez", 0
     intro2  BYTE "This program calculates and displays the factors of numbers between upper and lower bounds, as well as when numbers are prime.", 0
@@ -30,6 +28,7 @@ LIM     equ 1001    ; 1001 so check can be inclusive
     prPrime BYTE "*** PRIME NUMBER ***",0
     prAgain	BYTE "Would you like to do another calc? (0 = no / 1 = yes): ", 0
 	prExit	BYTE "Goodbye ", 0
+    prXC    BYTE "The Prime Number List extra credit option has been completed",0
    
     usName  BYTE 33 DUP(0)
     usLowr  DWORD ?
@@ -41,6 +40,7 @@ LIM     equ 1001    ; 1001 so check can be inclusive
     space   BYTE " ",0
     flag    WORD 0
 
+
 .code
 main PROC
 
@@ -51,6 +51,9 @@ main PROC
     mov     edx, OFFSET intro2
     call    WriteString
     call    Crlf
+    ;mov     edx, OFFSET prXC
+    ;call    WriteString
+    ;call    Crlf
 
     ; get name
     mov     edx, OFFSET prName
@@ -147,6 +150,7 @@ forLoop:
     cmp     ecx, ebx
     je      continue
 
+    ;print number to check
     mov     eax, ecx
     call    WriteDec
     mov     edx, OFFSET colon
@@ -156,6 +160,7 @@ forLoop:
     mov     edx, OFFSET space
     call    WriteString
 
+    ;start at 2 b/c 1 is always a factor
     mov     loopCt, 2
     jmp     innerLoop
 
@@ -198,7 +203,7 @@ printFactor:
 
 
 printPrime:
-    ; print that number was prime
+    ; print that number was prime and push it to stack for later
     mov     eax, loopCt
     call    WriteDec
     mov     edx, OFFSET space
@@ -208,16 +213,32 @@ printPrime:
 
     jmp     forLoop
 
-    
-
-
+ 
+    ;jump out of program, ask about going again
 continue:
 
-endProg:
+    mov edx, OFFSET prAgain
+	call WriteString
+	call Crlf
 
-    ; from template
-    exit ; exit to operating system
+	call	ReadInt		;get input
+	mov		usAgain, eax
+	call	Crlf
+
+	; 8.1 check user input
+	cmp usAgain, 0		            ;Important, check against int, not char
+	jne getLower                    ; jump to doCalcs if usAgain is not equal to 0
+	je endProg                      ; jump to endProg if usAgain is equal to 0
+
+
+endProg:
+	mov edx, OFFSET prExit
+	call WriteString
+	
+	mov edx, OFFSET usName
+	call WriteString
+
+    exit
 main ENDP
 
-; (insert additional procedures here)
 END main
