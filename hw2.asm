@@ -151,12 +151,15 @@ forLoop:
     call    WriteDec
     mov     edx, OFFSET colon
     call    WriteString
+    mov     eax, 1
+    call    WriteDec
+    mov     edx, OFFSET space
+    call    WriteString
 
     mov     loopCt, 2
     jmp     innerLoop
 
   
-
     ; run inner loop
 innerLoop:
     cmp     loopCt, ecx           ; while j < i
@@ -172,9 +175,13 @@ innerLoop:
     inc     loopCt
     jmp     innerLoop        
     
+
+    ;if there were no factors found then the number was prime
 checkPrime:
-    cmp flag, 0
-    je printPrime
+    cmp     flag, 0
+    je      printPrime
+    mov     eax, loopCt
+    call    WriteDec
     jmp forLoop
 
 
@@ -192,8 +199,13 @@ printFactor:
 
 printPrime:
     ; print that number was prime
+    mov     eax, loopCt
+    call    WriteDec
+    mov     edx, OFFSET space
+    call    WriteString
     mov     edx, OFFSET prPrime
     call    WriteString
+
     jmp     forLoop
 
     
