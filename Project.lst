@@ -1,4 +1,4 @@
-Microsoft (R) Macro Assembler Version 14.35.32216.1	    02/01/24 01:27:57
+Microsoft (R) Macro Assembler Version 14.35.32216.1	    02/01/24 13:15:57
 Assignment2 (hw2.asm					     Page 1 - 1
 
 
@@ -140,16 +140,22 @@ Microsoft (R) Macro Assembler Version 14.35.32216.1	    02/01/24 01:27:57
 	   65 20 74 72 79
 	   20 61 67 61 69
 	   6E 00
+ 000001E3 2A 2A 2A 20 50	    prPrime BYTE "*** PRIME NUMBER ***",0
+	   52 49 4D 45 20
+	   4E 55 4D 42 45
+	   52 20 2A 2A 2A
+	   00
 
- 000001E3  00000021 [		    usName  BYTE 33 DUP(0)
+ 000001F8  00000021 [		    usName  BYTE 33 DUP(0)
 	    00
 	   ]
- 00000204 00000000		    usLowr  DWORD ?
- 00000208 00000000		    usHigh  DWORD ?
+ 00000219 00000000		    usLowr  DWORD ?
+ 0000021D 00000000		    usHigh  DWORD ?
 
- 0000020C 00000000		    loopCt  DWORD ?
- 00000210 3A 20 00		    colon   BYTE ": ",0
- 00000213 20 00			    space   BYTE " ",0
+ 00000221 00000000		    loopCt  DWORD ?
+ 00000225 3A 20 00		    colon   BYTE ": ",0
+ 00000228 20 00			    space   BYTE " ",0
+ 0000022A 0000			    flag    WORD 0
 
  00000000			.code
  00000000			main PROC
@@ -166,7 +172,7 @@ Microsoft (R) Macro Assembler Version 14.35.32216.1	    02/01/24 01:27:57
  0000001E  BA 0000009B R	    mov     edx, OFFSET prName
  00000023  E8 00000000 E	    call    WriteString
 				    
- 00000028  BA 000001E3 R	    mov     edx, OFFSET usName
+ 00000028  BA 000001F8 R	    mov     edx, OFFSET usName
  0000002D  B9 00000020		    mov     ecx, 32
  00000032  E8 00000000 E	    call    ReadString
  00000037  E8 00000000 E	    call    Crlf
@@ -178,15 +184,15 @@ Microsoft (R) Macro Assembler Version 14.35.32216.1	    02/01/24 01:27:57
  00000041  E8 00000000 E	    call    WriteString
 				    
  00000046  E8 00000000 E	    call    ReadInt             ; stores in eax
- 0000004B  A3 00000204 R	    mov     usLowr, eax
+ 0000004B  A3 00000219 R	    mov     usLowr, eax
  00000050  E8 00000000 E	    call    Crlf
 				    
 				    ; check if too low
- 00000055  83 3D 00000204 R	    cmp     usLowr, 1
+ 00000055  83 3D 00000219 R	    cmp     usLowr, 1
 	   01
  0000005C  7C 0E		    jl      lowerTooLow         ; if below 1
 				    
- 0000005E  81 3D 00000204 R	    cmp     usLowr, 1000
+ 0000005E  81 3D 00000219 R	    cmp     usLowr, 1000
 	   000003E8
  00000068  7F 13		    jg      lowerTooHigh
  0000006A  EB 22		    jmp     getHigher
@@ -213,15 +219,15 @@ Microsoft (R) Macro Assembler Version 14.35.32216.1	    02/01/24 01:27:57
  00000093  E8 00000000 E	    call    WriteString
 				    
  00000098  E8 00000000 E	    call    ReadInt             ; stores in eax
- 0000009D  A3 00000208 R	    mov     usHigh, eax
+ 0000009D  A3 0000021D R	    mov     usHigh, eax
  000000A2  E8 00000000 E	    call    Crlf
 				    
 				    ; check if too low
- 000000A7  A1 00000204 R	    mov     eax, usLowr
- 000000AC  39 05 00000208 R	    cmp     usHigh, eax
+ 000000A7  A1 00000219 R	    mov     eax, usLowr
+ 000000AC  39 05 0000021D R	    cmp     usHigh, eax
  000000B2  7C 0E		    jl      higherTooLow       ; if below lower bound
 				    
- 000000B4  81 3D 00000208 R	    cmp     usHigh, LIM
+ 000000B4  81 3D 0000021D R	    cmp     usHigh, LIM
 	   000003E9
  000000BE  7F 13		    jg      higherTooHigh
  000000C0  EB 22		    jmp     prepMath
@@ -244,9 +250,9 @@ Microsoft (R) Macro Assembler Version 14.35.32216.1	    02/01/24 01:27:57
 
 				    ; start calcs
  000000E4			prepMath:
- 000000E4  8B 0D 00000204 R	    mov     ecx, usLowr
+ 000000E4  8B 0D 00000219 R	    mov     ecx, usLowr
  000000EA  49			    dec     ecx                 ; decrement by 1 so that foorloop can include an inc  
- 000000EB  8B 1D 00000208 R	    mov     ebx, usHigh         ; exclusive
+ 000000EB  8B 1D 0000021D R	    mov     ebx, usHigh         ; exclusive
  000000F1  43			    inc     ebx                 ; inc b/c exclusive
  000000F2  BA 00000000		    mov     edx, 0              ; prep for division
  000000F7  EB 00		    jmp     forLoop
@@ -254,65 +260,83 @@ Microsoft (R) Macro Assembler Version 14.35.32216.1	    02/01/24 01:27:57
 				    ; do while ecx != ebx
  000000F9			forLoop:
  000000F9  E8 00000000 E	    call    crlf
+ 000000FE  66| C7 05		    mov     flag, 0
+	   0000022A R
+	   0000
 
- 000000FE  41			    inc     ecx
- 000000FF  3B CB		    cmp     ecx, ebx
- 00000101  74 5B		    je      continue
+ 00000107  41			    inc     ecx
+ 00000108  3B CB		    cmp     ecx, ebx
+ 0000010A  74 7F		    je      continue
 
- 00000103  8B C1		    mov     eax, ecx
- 00000105  E8 00000000 E	    call    WriteDec
- 0000010A  BA 00000210 R	    mov     edx, OFFSET colon
- 0000010F  E8 00000000 E	    call    WriteString
+ 0000010C  8B C1		    mov     eax, ecx
+ 0000010E  E8 00000000 E	    call    WriteDec
+ 00000113  BA 00000225 R	    mov     edx, OFFSET colon
+ 00000118  E8 00000000 E	    call    WriteString
 
- 00000114  C7 05 0000020C R	    mov     loopCt, 2
+ 0000011D  C7 05 00000221 R	    mov     loopCt, 2
 	   00000002
- 0000011E  EB 00		    jmp     innerLoop
+ 00000127  EB 00		    jmp     innerLoop
 
 				  
 
-
 				    ; run inner loop
- 00000120			innerLoop:
- 00000120  39 0D 0000020C R	    cmp     loopCt, ecx           ; while j < i
- 00000126  7D D1		    jge      forLoop
+ 00000129			innerLoop:
+ 00000129  39 0D 00000221 R	    cmp     loopCt, ecx           ; while j < i
+ 0000012F  7D 1A		    jge     checkPrime
 
- 00000128  8B C1		    mov     eax, ecx
- 0000012A  BA 00000000		    mov     edx, 0
- 0000012F  F7 35 0000020C R	    div     loopCt
+ 00000131  8B C1		    mov     eax, ecx
+ 00000133  BA 00000000		    mov     edx, 0
+ 00000138  F7 35 00000221 R	    div     loopCt
 
- 00000135  83 FA 00		    cmp     edx, 0                 ; check for remainder
- 00000138  74 08		    je      printFactor
+ 0000013E  83 FA 00		    cmp     edx, 0                 ; check for remainder
+ 00000141  74 14		    je      printFactor
 
- 0000013A  FF 05 0000020C R	    inc     loopCt
- 00000140  EB DE		    jmp     innerLoop             
+ 00000143  FF 05 00000221 R	    inc     loopCt
+ 00000149  EB DE		    jmp     innerLoop        
+				    
+ 0000014B			checkPrime:
+ 0000014B  66| 83 3D		    cmp flag, 0
+	   0000022A R 00
+ 00000153  74 27		    je printPrime
+ 00000155  EB A2		    jmp forLoop
 
 
 				    ; if no remainder print factor
- 00000142			printFactor:
- 00000142  A1 0000020C R	    mov     eax, loopCt
- 00000147  E8 00000000 E	    call    WriteDec
- 0000014C  BA 00000213 R	    mov     edx, OFFSET space
- 00000151  E8 00000000 E	    call    WriteString
+ 00000157			printFactor:
+ 00000157  66| C7 05		    mov     flag, 1
+	   0000022A R
+	   0001
+ 00000160  A1 00000221 R	    mov     eax, loopCt
+ 00000165  E8 00000000 E	    call    WriteDec
+ 0000016A  BA 00000228 R	    mov     edx, OFFSET space
+ 0000016F  E8 00000000 E	    call    WriteString
 
- 00000156  FF 05 0000020C R	    inc     loopCt
- 0000015C  EB C2		    jmp     innerLoop
+ 00000174  FF 05 00000221 R	    inc     loopCt
+ 0000017A  EB AD		    jmp     innerLoop
+
+
+ 0000017C			printPrime:
+				    ; print that number was prime
+ 0000017C  BA 000001E3 R	    mov     edx, OFFSET prPrime
+ 00000181  E8 00000000 E	    call    WriteString
+ 00000186  E9 FFFFFF6E		    jmp     forLoop
 
 				    
 
 
- 0000015E			continue:
+ 0000018B			continue:
 
- 0000015E			endProg:
+ 0000018B			endProg:
 
 				    ; from template
 				    exit ; exit to operating system
- 0000015E  6A 00	   *	    push   +000000000h
- 00000160  E8 00000000 E   *	    call   ExitProcess
- 00000165			main ENDP
+ 0000018B  6A 00	   *	    push   +000000000h
+ 0000018D  E8 00000000 E   *	    call   ExitProcess
+ 00000192			main ENDP
 
 				; (insert additional procedures here)
 				END main
-Microsoft (R) Macro Assembler Version 14.35.32216.1	    02/01/24 01:27:57
+Microsoft (R) Macro Assembler Version 14.35.32216.1	    02/01/24 13:15:57
 Assignment2 (hw2.asm					     Symbols 2 - 1
 
 
@@ -406,8 +430,8 @@ Segments and Groups:
 
 FLAT . . . . . . . . . . . . . .	GROUP
 STACK  . . . . . . . . . . . . .	32 Bit	 00001000 Para	  Stack	  'STACK'	 
-_DATA  . . . . . . . . . . . . .	32 Bit	 00000215 Para	  Public  'DATA'	
-_TEXT  . . . . . . . . . . . . .	32 Bit	 00000165 Para	  Public  'CODE'	
+_DATA  . . . . . . . . . . . . .	32 Bit	 0000022C Para	  Public  'DATA'	
+_TEXT  . . . . . . . . . . . . .	32 Bit	 00000192 Para	  Public  'CODE'	
 
 
 Procedures, parameters, and locals:
@@ -514,7 +538,7 @@ WriteStackFrame  . . . . . . . .	P Near	 00000000 FLAT	Length= 00000000 External
 WriteString  . . . . . . . . . .	P Near	 00000000 FLAT	Length= 00000000 External STDCALL
 WriteToFile  . . . . . . . . . .	P Near	 00000000 FLAT	Length= 00000000 External STDCALL
 WriteWindowsMsg  . . . . . . . .	P Near	 00000000 FLAT	Length= 00000000 External STDCALL
-main . . . . . . . . . . . . . .	P Near	 00000000 _TEXT	Length= 00000165 Public STDCALL
+main . . . . . . . . . . . . . .	P Near	 00000000 _TEXT	Length= 00000192 Public STDCALL
   getLower . . . . . . . . . . .	L Near	 0000003C _TEXT	
   lowerTooLow  . . . . . . . . .	L Near	 0000006C _TEXT	
   lowerTooHigh . . . . . . . . .	L Near	 0000007D _TEXT	
@@ -523,10 +547,12 @@ main . . . . . . . . . . . . . .	P Near	 00000000 _TEXT	Length= 00000165 Public 
   higherTooHigh  . . . . . . . .	L Near	 000000D3 _TEXT	
   prepMath . . . . . . . . . . .	L Near	 000000E4 _TEXT	
   forLoop  . . . . . . . . . . .	L Near	 000000F9 _TEXT	
-  innerLoop  . . . . . . . . . .	L Near	 00000120 _TEXT	
-  printFactor  . . . . . . . . .	L Near	 00000142 _TEXT	
-  continue . . . . . . . . . . .	L Near	 0000015E _TEXT	
-  endProg  . . . . . . . . . . .	L Near	 0000015E _TEXT	
+  innerLoop  . . . . . . . . . .	L Near	 00000129 _TEXT	
+  checkPrime . . . . . . . . . .	L Near	 0000014B _TEXT	
+  printFactor  . . . . . . . . .	L Near	 00000157 _TEXT	
+  printPrime . . . . . . . . . .	L Near	 0000017C _TEXT	
+  continue . . . . . . . . . . .	L Near	 0000018B _TEXT	
+  endProg  . . . . . . . . . . .	L Near	 0000018B _TEXT	
 printf . . . . . . . . . . . . .	P Near	 00000000 FLAT	Length= 00000000 External C
 scanf  . . . . . . . . . . . . .	P Near	 00000000 FLAT	Length= 00000000 External C
 wsprintfA  . . . . . . . . . . .	P Near	 00000000 FLAT	Length= 00000000 External C
@@ -749,9 +775,10 @@ WriteConsole . . . . . . . . . .	Text   	 WriteConsoleA
 black  . . . . . . . . . . . . .	Number	 00000000h   
 blue . . . . . . . . . . . . . .	Number	 00000001h   
 brown  . . . . . . . . . . . . .	Number	 00000006h   
-colon  . . . . . . . . . . . . .	Byte	 00000210 _DATA	
+colon  . . . . . . . . . . . . .	Byte	 00000225 _DATA	
 cyan . . . . . . . . . . . . . .	Number	 00000003h   
 exit . . . . . . . . . . . . . .	Text   	 INVOKE ExitProcess,0
+flag . . . . . . . . . . . . . .	Word	 0000022A _DATA	
 gray . . . . . . . . . . . . . .	Number	 00000008h   
 green  . . . . . . . . . . . . .	Number	 00000002h   
 intro1 . . . . . . . . . . . . .	Byte	 00000000 _DATA	
@@ -762,7 +789,7 @@ lightGray  . . . . . . . . . . .	Number	 00000007h
 lightGreen . . . . . . . . . . .	Number	 0000000Ah   
 lightMagenta . . . . . . . . . .	Number	 0000000Dh   
 lightRed . . . . . . . . . . . .	Number	 0000000Ch   
-loopCt . . . . . . . . . . . . .	DWord	 0000020C _DATA	
+loopCt . . . . . . . . . . . . .	DWord	 00000221 _DATA	
 magenta  . . . . . . . . . . . .	Number	 00000005h   
 prAgin . . . . . . . . . . . . .	Byte	 0000011E _DATA	
 prHiLo . . . . . . . . . . . . .	Byte	 00000184 _DATA	
@@ -771,11 +798,12 @@ prLoHi . . . . . . . . . . . . .	Byte	 000001B4 _DATA
 prLoLo . . . . . . . . . . . . .	Byte	 00000155 _DATA	
 prLowr . . . . . . . . . . . . .	Byte	 000000AD _DATA	
 prName . . . . . . . . . . . . .	Byte	 0000009B _DATA	
+prPrime  . . . . . . . . . . . .	Byte	 000001E3 _DATA	
 red  . . . . . . . . . . . . . .	Number	 00000004h   
-space  . . . . . . . . . . . . .	Byte	 00000213 _DATA	
-usHigh . . . . . . . . . . . . .	DWord	 00000208 _DATA	
-usLowr . . . . . . . . . . . . .	DWord	 00000204 _DATA	
-usName . . . . . . . . . . . . .	Byte	 000001E3 _DATA	
+space  . . . . . . . . . . . . .	Byte	 00000228 _DATA	
+usHigh . . . . . . . . . . . . .	DWord	 0000021D _DATA	
+usLowr . . . . . . . . . . . . .	DWord	 00000219 _DATA	
+usName . . . . . . . . . . . . .	Byte	 000001F8 _DATA	
 white  . . . . . . . . . . . . .	Number	 0000000Fh   
 wsprintf . . . . . . . . . . . .	Text   	 wsprintfA
 yellow . . . . . . . . . . . . .	Number	 0000000Eh   

@@ -27,14 +27,19 @@ LIM     equ 1001    ; 1001 so check can be inclusive
     prLoLo  BYTE "Sorry, that value is too low, please try again", 0
     prHiLo  BYTE "Sorry, that value is too high, please try again", 0
     prLoHi  BYTE "Input must be >= lower bound, please try again", 0
-
+    prPrime BYTE "*** PRIME NUMBER ***",0
+    prAgain	BYTE "Would you like to do another calc? (0 = no / 1 = yes): ", 0
+	prExit	BYTE "Goodbye ", 0
+   
     usName  BYTE 33 DUP(0)
     usLowr  DWORD ?
     usHigh  DWORD ?
+   	usAgain DWORD ?
 
     loopCt  DWORD ?
     colon   BYTE ": ",0
     space   BYTE " ",0
+    flag    WORD 0
 
 .code
 main PROC
@@ -136,6 +141,7 @@ prepMath:
     ; do while ecx != ebx
 forLoop:
     call    crlf
+    mov     flag, 0
 
     inc     ecx
     cmp     ecx, ebx
@@ -151,11 +157,10 @@ forLoop:
 
   
 
-
     ; run inner loop
 innerLoop:
     cmp     loopCt, ecx           ; while j < i
-    jge      forLoop
+    jge     checkPrime
 
     mov     eax, ecx
     mov     edx, 0
@@ -165,11 +170,17 @@ innerLoop:
     je      printFactor
 
     inc     loopCt
-    jmp     innerLoop             
+    jmp     innerLoop        
+    
+checkPrime:
+    cmp flag, 0
+    je printPrime
+    jmp forLoop
 
 
     ; if no remainder print factor
 printFactor:
+    mov     flag, 1
     mov     eax, loopCt
     call    WriteDec
     mov     edx, OFFSET space
@@ -177,6 +188,13 @@ printFactor:
 
     inc     loopCt
     jmp     innerLoop
+
+
+printPrime:
+    ; print that number was prime
+    mov     edx, OFFSET prPrime
+    call    WriteString
+    jmp     forLoop
 
     
 
