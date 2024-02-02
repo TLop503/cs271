@@ -29,6 +29,7 @@ LIM     equ 1001    ; 1001 so check can be inclusive
     prAgain	BYTE "Would you like to do another calc? (0 = no / 1 = yes): ", 0
 	prExit	BYTE "Goodbye ", 0
     prXC    BYTE "The Prime Number List extra credit option has been completed",0
+    prAlPrm BYTE "All Prime Numbers: ",0
    
     usName  BYTE 33 DUP(0)
     usLowr  DWORD ?
@@ -39,6 +40,8 @@ LIM     equ 1001    ; 1001 so check can be inclusive
     colon   BYTE ": ",0
     space   BYTE " ",0
     flag    WORD 0
+    stklim  DWORD 0
+    patch   DWORD 2
 
 
 .code
@@ -51,9 +54,9 @@ main PROC
     mov     edx, OFFSET intro2
     call    WriteString
     call    Crlf
-    ;mov     edx, OFFSET prXC
-    ;call    WriteString
-    ;call    Crlf
+    mov     edx, OFFSET prXC
+    call    WriteString
+    call    Crlf
 
     ; get name
     mov     edx, OFFSET prName
@@ -139,6 +142,7 @@ prepMath:
     mov     ebx, usHigh         ; exclusive
     inc     ebx                 ; inc b/c exclusive
     mov     edx, 0              ; prep for division
+    mov     stklim, esp         ;find stack starting point
     jmp     forLoop
 
     ; do while ecx != ebx
@@ -148,7 +152,7 @@ forLoop:
 
     inc     ecx
     cmp     ecx, ebx
-    je      continue
+    je      printAllPrimesPrep
 
     ;print number to check
     mov     eax, ecx
@@ -205,6 +209,7 @@ printFactor:
 printPrime:
     ; print that number was prime and push it to stack for later
     mov     eax, loopCt
+    push    eax
     call    WriteDec
     mov     edx, OFFSET space
     call    WriteString
@@ -215,13 +220,43 @@ printPrime:
 
  
     ;jump out of program, ask about going again
+
+printAllPrimesPrep:
+    mov     edx, OFFSET prAlPrm
+    call    WriteString
+
+    jmp     printAllPrimes
+
+printAllPrimes:
+    cmp     esp, stklim
+    je      continue
+    pop     eax                         ; pop stack into eax
+    cmp     eax, 2                      ; patch for 2 being printed twice. idfk
+    je      exitTwo
+    jmp     actuallyPrintPrimes
+
+actuallyPrintPrimes:
+    call    WriteDec
+    mov     edx, OFFSET space
+    call    WriteString
+    jmp     printAllPrimes
+
+
+exitTwo:                                ; to stop 2 from being printed twice just do it by hand
+    mov     eax, 2
+    call    WriteDec
+    mov     edx, OFFSET space
+    call    WriteString
+    jmp     continue
+
+
 continue:
+    call    Crlf
+    mov     edx, OFFSET prAgain
+	call    WriteString
+	call    Crlf
 
-    mov edx, OFFSET prAgain
-	call WriteString
-	call Crlf
-
-	call	ReadInt		;get input
+	call	ReadInt		                ;get input
 	mov		usAgain, eax
 	call	Crlf
 
