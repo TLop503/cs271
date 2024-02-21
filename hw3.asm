@@ -6,8 +6,8 @@ TITLE Assignment3 (hw3.asm)
 
 INCLUDE Irvine32.inc
 
-UPPLIM     EQU     401     ; 401 so check is inclusive
-LOWLIM     EQU     0     
+UPPLIM     EQU     400
+LOWLIM     EQU     4    ; b/c 1 breaks
 
 .data
     ; variable definitions
@@ -17,7 +17,7 @@ LOWLIM     EQU     0
     
     intro1  BYTE    "Hw3: Composite Numbers, by Troy Lopez",0
     
-    data1   BYTE    "Enter the number of composites to display, up to 400 (inclusive)",0
+    data1   BYTE    "Enter the number of composites to display, from [4-100] (b/c the first composite number is 4)",0
     usLim   DWORD   ?
     debug1  BYTE    "data is good (debug message)",0
     dataEr  BYTE    "Out of range, try again",0
@@ -45,6 +45,7 @@ main PROC
     RET
 main ENDP
 
+; Prints out the instructions for the program. Touches EDX. No significant pre/post conditions
 intr PROC
     MOV     edx, OFFSET intro1
     CALL    WRITESTRING
@@ -53,6 +54,7 @@ intr PROC
     RET
 intr ENDP
 
+; gets user data. uses EDX, EAX. no prec. post condition: calls validate to check usLim
 getUsData PROC
     MOV     edx, OFFSET data1   ; Print prompt for data
     CALL    WRITESTRING    
@@ -62,6 +64,7 @@ getUsData PROC
     ret
 getUsData ENDP
 
+; verifies usLim is within valid range. Uses EAX, EDX. Prec: usLim is filled. Post: either data is called again, or funciton returns thru data to main.
 validate PROC
     ; Verify if the user input is within the acceptable range
     MOV     EAX, usLim        ; Move the user input into EAX
@@ -80,8 +83,9 @@ validate PROC
         CALL    getUsData        ; Prompt user again
 validate ENDP
 
-; everything above this sorta works
-
+; print out every composite number up to usLim. Uses ECX, EAX, EDX, and 1 stack slot. Prec: usLim has been verified. Post: return to main after printing
+; outer iterates through numbers to be checked, using push/pop to store ECX between iterations. 
+; inner checks each factor until composite or not is determined
 showComposites PROC
     MOV     ECX, usLim
     DEC     ECX     ; denominator needs to be less than numerator to check composites
@@ -123,6 +127,7 @@ showComposites PROC
     ; outer loop will happen again after printing or after exhausting factors
 showComposites ENDP
 
+; asks if user wants to repeat program. uses EDX, EAX. no strict PREC. Post: user returns to main or restarts main.
 goAgain PROC
     call    Crlf
     mov     edx, OFFSET prAgain
@@ -142,6 +147,7 @@ goAgain PROC
         CALL    main    ;restart program
 goagain ENDP
 
+; end program. EDX. PREC: user got here by choosing no in goAgain. Post: program exits.
 theEnd PROC
 	mov edx, OFFSET bye
 	call WriteString

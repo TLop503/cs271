@@ -1,4 +1,4 @@
-Microsoft (R) Macro Assembler Version 14.35.32216.1	    02/20/24 17:46:34
+Microsoft (R) Macro Assembler Version 14.35.32216.1	    02/20/24 18:02:13
 Assignment3 (hw3.asm					     Page 1 - 1
 
 
@@ -27,8 +27,8 @@ Microsoft (R) Macro Assembler Version 14.35.32216.1	    02/20/24 17:46:34
 			      C .LIST
 			      C 
 
- = 00000191			UPPLIM     EQU     401     ; 401 so check is inclusive
- = 00000000			LOWLIM     EQU     0     
+ = 00000190			UPPLIM     EQU     400
+ = 00000002			LOWLIM     EQU     2
 
  00000000			.data
 				    ; variable definitions
@@ -126,9 +126,9 @@ Microsoft (R) Macro Assembler Version 14.35.32216.1	    02/20/24 17:46:34
  00000049			validate PROC
 				    ; Verify if the user input is within the acceptable range
  00000049  A1 00000067 R	    MOV     EAX, usLim        ; Move the user input into EAX
- 0000004E  83 F8 00		    CMP     EAX, LOWLIM       ; Compare with the lower limit
+ 0000004E  83 F8 02		    CMP     EAX, LOWLIM       ; Compare with the lower limit
  00000051  7C 08		    JL      invalid           ; Jump to invalid if less than the lower limit
- 00000053  3D 00000191		    CMP     EAX, UPPLIM       ; Compare with the upper limit
+ 00000053  3D 00000190		    CMP     EAX, UPPLIM       ; Compare with the upper limit
  00000058  7F 01		    JG      invalid           ; Jump to invalid if greater than the upper limit
 				    ; if all checks pass return to normal
  0000005A  C3			    RET
@@ -207,14 +207,14 @@ Microsoft (R) Macro Assembler Version 14.35.32216.1	    02/20/24 17:46:34
  000000F4			theEnd PROC
  000000F4  BA 000000DD R		mov edx, OFFSET bye
  000000F9  E8 00000000 E		call WriteString
-				    EXIT
+				    EXIT    ;shoot self in foot to exit early so main doesnt call this multiple times
  000000FE  6A 00	   *	    push   +000000000h
  00000100  E8 00000000 E   *	    call   ExitProcess
  00000105			theEnd ENDP
 
 
 				END main
-Microsoft (R) Macro Assembler Version 14.35.32216.1	    02/20/24 17:46:34
+Microsoft (R) Macro Assembler Version 14.35.32216.1	    02/20/24 18:02:13
 Assignment3 (hw3.asm					     Symbols 2 - 1
 
 
@@ -520,7 +520,7 @@ KEY_EVENT  . . . . . . . . . . .	Number	 00000001h
 KEY_MASKS  . . . . . . . . . . .	Number	 0000001Fh   
 LEFT_ALT_PRESSED . . . . . . . .	Number	 00000002h   
 LEFT_CTRL_PRESSED  . . . . . . .	Number	 00000008h   
-LOWLIM . . . . . . . . . . . . .	Number	 00000000h   
+LOWLIM . . . . . . . . . . . . .	Number	 00000002h   
 MB_ABORTRETRYIGNORE  . . . . . .	Number	 00000002h   
 MB_APPLMODAL . . . . . . . . . .	Number	 00000000h   
 MB_CANCELTRYCONTINUE . . . . . .	Number	 00000006h   
@@ -567,7 +567,7 @@ SetConsoleTitle  . . . . . . . .	Text   	 SetConsoleTitleA
 TAB  . . . . . . . . . . . . . .	Number	 00000009h   
 TRUE . . . . . . . . . . . . . .	Number	 00000001h   
 TRUNCATE_EXISTING  . . . . . . .	Number	 00000005h   
-UPPLIM . . . . . . . . . . . . .	Number	 00000191h   
+UPPLIM . . . . . . . . . . . . .	Number	 00000190h   
 VK_11  . . . . . . . . . . . . .	Number	 000000BDh   
 VK_12  . . . . . . . . . . . . .	Number	 000000BBh   
 VK_ADD . . . . . . . . . . . . .	Number	 0000006Bh   
