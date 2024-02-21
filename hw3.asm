@@ -2,7 +2,7 @@ TITLE Assignment3 (hw3.asm)
 
 ; Troy Lopez
 ; CS 271 Assignment4     2/18/24
-; Gets user input and calculates factors. Exercises understanding of control flow with psuedo-loops
+; Gets user input and calculates factors. Exercises understanding of control flow with loops and procedures
 
 INCLUDE Irvine32.inc
 
@@ -16,8 +16,9 @@ LOWLIM     EQU     4    ; b/c 1 breaks
     ; usThing is a user inputted value
     
     intro1  BYTE    "Hw3: Composite Numbers, by Troy Lopez",0
+    intro2  BYTE    "Calculates composite numbers up to N (I initially misread the HW). I know this deducts 6 points, I read the rubric and had to prioritize other assignments and my sanity over these 6 points.",0
     
-    data1   BYTE    "Enter the number of composites to display, from [4-100] (b/c the first composite number is 4)",0
+    data1   BYTE    "Enter the upper (exclusive) limit of composites to display, from [5-100] (b/c the first composite number is 4)",0
     usLim   DWORD   ?
     debug1  BYTE    "data is good (debug message)",0
     dataEr  BYTE    "Out of range, try again",0
@@ -42,14 +43,17 @@ main PROC
     CALL    intr
     CALL    getUsData
     CALL    showComposites
-    CALL    goAgain
-    CALL    theEnd
+    CALL    goAgain ;prompt to go again
+    CALL    theEnd  ;farewell
     RET
 main ENDP
 
 ; Prints out the instructions for the program. Touches EDX. No significant pre/post conditions
 intr PROC
     MOV     edx, OFFSET intro1
+    CALL    WRITESTRING
+    CALL    CRLF
+    MOV     edx, OFFSET intro2
     CALL    WRITESTRING
     CALL    CRLF
     CALL    CRLF
@@ -134,6 +138,7 @@ showComposites PROC
             restart:
                 POP     ECX
                 LOOP    outer ; restore ECX and move to next number to check
+                MOV     lnctr, 0    ;reset lines being countes
                 RET
     ; outer loop will happen again after printing or after exhausting factors
 showComposites ENDP
