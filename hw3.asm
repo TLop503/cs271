@@ -7,7 +7,7 @@ TITLE Assignment3 (hw3.asm)
 INCLUDE Irvine32.inc
 
 UPPLIM     EQU     400
-LOWLIM     EQU     4    ; b/c 1 breaks
+LOWLIM     EQU     1    ; b/c 1 breaks
 
 .data
     ; variable definitions
@@ -16,9 +16,9 @@ LOWLIM     EQU     4    ; b/c 1 breaks
     ; usThing is a user inputted value
     
     intro1  BYTE    "Hw3: Composite Numbers, by Troy Lopez",0
-    intro2  BYTE    "Calculates composite numbers up to N (I initially misread the HW). I know this deducts 6 points, I read the rubric and had to prioritize other assignments and my sanity over these 6 points.",0
+    intro2  BYTE    "Calculates N composite numbers, up to 400",0
     
-    data1   BYTE    "Enter the upper (exclusive) limit of composites to display, from [5-100] (b/c the first composite number is 4)",0
+    data1   BYTE    "How many composites do you want to calculate (up to 400): ",0
     usLim   DWORD   ?
     debug1  BYTE    "data is good (debug message)",0
     dataEr  BYTE    "Out of range, try again",0
@@ -94,13 +94,9 @@ validate ENDP
 ; inner checks each factor until composite or not is determined
 showComposites PROC
     MOV     ECX, usLim
-    DEC     ECX     ; denominator needs to be less than numerator to check composites
+    MOV     toCheck, 4
 
     outer:
-        MOV     EAX, usLim
-        MOV     toCheck, EAX
-        SUB     toCheck, ECX    ; start from 1 then increase as x decreases
-
         PUSH    ECX     ; save for later
         MOV     ECX, toCheck
         DEC     ECX     ; start looking for valid denominators from check
@@ -109,7 +105,7 @@ showComposites PROC
             MOV     EDX, 0 ; fill EDX for division
             
             CMP     ECX, 1
-            JLE     restart ; dont check tocheck / 1, b/c this will always be 0
+            JLE     elseRestart ; dont check tocheck / 1, b/c this will always be 0
 
             MOV     EAX, toCheck
             DIV     ECX
@@ -117,7 +113,6 @@ showComposites PROC
             JE      print
 
             LOOP    inner  ; otherwise restart
-            JMP     restart ; to skip over print once loop ends
             
             print:
                 inc     lnctr
@@ -137,9 +132,17 @@ showComposites PROC
 
             restart:
                 POP     ECX
+                INC     toCheck
                 LOOP    outer ; restore ECX and move to next number to check
                 MOV     lnctr, 0    ;reset lines being countes
                 RET
+
+            elseRestart:
+                POP     ECX
+                INC     ECX ;since comp wasnt found this round doesnt count
+                INC     toCheck
+                LOOP    outer
+                ; no need to mess with lnctr since this will always end on restart
     ; outer loop will happen again after printing or after exhausting factors
 showComposites ENDP
 
