@@ -110,7 +110,7 @@ showComposites PROC
             JMP     restart ; to skip over print once loop ends
             
             print:
-                MOV     EDX, toCheck
+                MOV     EAX, toCheck
                 CALL    WRITEDEC
                 MOV     EDX, OFFSET space
                 CALL    WRITESTRING
@@ -145,7 +145,7 @@ goagain ENDP
 theEnd PROC
 	mov edx, OFFSET bye
 	call WriteString
-    RET
+    EXIT    ;shoot self in foot to exit early so main doesnt call this multiple times
 theEnd ENDP
 
 
