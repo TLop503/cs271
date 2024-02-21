@@ -39,10 +39,10 @@ main PROC
     
     CALL    intr
     CALL    getUsData
-    ;CALL    showComposites
+    CALL    showComposites
     CALL    goAgain
     CALL    theEnd
-    EXIT
+    RET
 main ENDP
 
 intr PROC
@@ -50,6 +50,7 @@ intr PROC
     CALL    WRITESTRING
     CALL    CRLF
     CALL    CRLF
+    RET
 intr ENDP
 
 getUsData PROC
@@ -79,6 +80,7 @@ validate PROC
         CALL    getUsData        ; Prompt user again
 validate ENDP
 
+; everything above this sorta works
 
 showComposites PROC
     MOV     ECX, usLim
@@ -97,7 +99,7 @@ showComposites PROC
             MOV     EDX, 0 ; fill EDX for division
             
             CMP     ECX, 1
-            JLE      restart ; dont check tocheck / 1, b/c this will always be 0
+            JLE     restart ; dont check tocheck / 1, b/c this will always be 0
 
             MOV     EAX, toCheck
             DIV     ECX
@@ -109,7 +111,7 @@ showComposites PROC
             
             print:
                 MOV     EDX, toCheck
-                CALL    WRITESTRING
+                CALL    WRITEDEC
                 MOV     EDX, OFFSET space
                 CALL    WRITESTRING
                 JMP     restart
@@ -117,6 +119,7 @@ showComposites PROC
             restart:
                 POP     ECX
                 LOOP    outer ; restore ECX and move to next number to check
+                RET
     ; outer loop will happen again after printing or after exhausting factors
 showComposites ENDP
 
@@ -142,6 +145,7 @@ goagain ENDP
 theEnd PROC
 	mov edx, OFFSET bye
 	call WriteString
+    RET
 theEnd ENDP
 
 

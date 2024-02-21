@@ -1,11 +1,11 @@
-Microsoft (R) Macro Assembler Version 14.35.32216.1	    02/01/24 16:29:36
-Assignment2 (hw2.asm					     Page 1 - 1
+Microsoft (R) Macro Assembler Version 14.35.32216.1	    02/20/24 17:38:52
+Assignment3 (hw3.asm					     Page 1 - 1
 
 
-				TITLE Assignment2 (hw2.asm)
+				TITLE Assignment3 (hw3.asm)
 
 				; Troy Lopez
-				; CS 271 Assignment1     2/1/24
+				; CS 271 Assignment4     2/18/24
 				; Gets user input and calculates factors. Exercises understanding of control flow with psuedo-loops
 
 				INCLUDE Irvine32.inc
@@ -27,416 +27,193 @@ Microsoft (R) Macro Assembler Version 14.35.32216.1	    02/01/24 16:29:36
 			      C .LIST
 			      C 
 
-				; constants go here
- = 000003E9			LIM     equ 1001    ; 1001 so check can be inclusive
+ = 00000191			UPPLIM     EQU     401     ; 401 so check is inclusive
+ = 00000000			LOWLIM     EQU     0     
 
  00000000			.data
 				    ; variable definitions
 				    ; Notation:
 				    ; prThing is a string to be printed
 				    ; usThing is a user inputted value
-
- 00000000 48 77 32 3A 20	    intro1  BYTE "Hw2: Factors, by Troy Lopez", 0
-	   46 61 63 74 6F
+				    
+ 00000000 48 77 33 3A 20	    intro1  BYTE    "Hw3: Composite Numbers, by Troy Lopez",0
+	   43 6F 6D 70 6F
+	   73 69 74 65 20
+	   4E 75 6D 62 65
 	   72 73 2C 20 62
 	   79 20 54 72 6F
 	   79 20 4C 6F 70
 	   65 7A 00
- 0000001C 54 68 69 73 20	    intro2  BYTE "This program calculates and displays the factors of numbers between upper and lower bounds, as well as when numbers are prime.", 0
-	   70 72 6F 67 72
-	   61 6D 20 63 61
-	   6C 63 75 6C 61
-	   74 65 73 20 61
-	   6E 64 20 64 69
-	   73 70 6C 61 79
-	   73 20 74 68 65
-	   20 66 61 63 74
-	   6F 72 73 20 6F
-	   66 20 6E 75 6D
-	   62 65 72 73 20
-	   62 65 74 77 65
-	   65 6E 20 75 70
-	   70 65 72 20 61
-	   6E 64 20 6C 6F
-	   77 65 72 20 62
-	   6F 75 6E 64 73
-	   2C 20 61 73 20
-	   77 65 6C 6C 20
-	   61 73 20 77 68
-	   65 6E 20 6E 75
-	   6D 62 65 72 73
-	   20 61 72 65 20
-	   70 72 69 6D 65
-	   2E 00
 				    
- 0000009B 45 6E 74 65 72	    prName  BYTE "Enter your name: ", 0
-	   20 79 6F 75 72
-	   20 6E 61 6D 65
-	   3A 20 00
- 000000AD 45 6E 74 65 72	    prLowr  BYTE "Enter a number between 1 and 1000 for the lower range: ", 0
-	   20 61 20 6E 75
-	   6D 62 65 72 20
-	   62 65 74 77 65
-	   65 6E 20 31 20
-	   61 6E 64 20 31
-	   30 30 30 20 66
-	   6F 72 20 74 68
-	   65 20 6C 6F 77
-	   65 72 20 72 61
-	   6E 67 65 3A 20
-	   00
- 000000E5 45 6E 74 65 72	    prHigh  BYTE "Enter a number between 1 and 1000 for the higher range: ", 0
-	   20 61 20 6E 75
-	   6D 62 65 72 20
-	   62 65 74 77 65
-	   65 6E 20 31 20
-	   61 6E 64 20 31
-	   30 30 30 20 66
-	   6F 72 20 74 68
-	   65 20 68 69 67
-	   68 65 72 20 72
-	   61 6E 67 65 3A
-	   20 00
- 0000011E 57 6F 75 6C 64	    prAgin  BYTE "Would you like to do another calculation? (1 yes/0 no)", 0
+ 00000026 45 6E 74 65 72	    data1   BYTE    "Enter the number of composites to display, up to 400 (inclusive)",0
+	   20 74 68 65 20
+	   6E 75 6D 62 65
+	   72 20 6F 66 20
+	   63 6F 6D 70 6F
+	   73 69 74 65 73
+	   20 74 6F 20 64
+	   69 73 70 6C 61
+	   79 2C 20 75 70
+	   20 74 6F 20 34
+	   30 30 20 28 69
+	   6E 63 6C 75 73
+	   69 76 65 29 00
+ 00000067 00000000		    usLim   DWORD   ?
+ 0000006B 64 61 74 61 20	    debug1  BYTE    "data is good (debug message)",0
+	   69 73 20 67 6F
+	   6F 64 20 28 64
+	   65 62 75 67 20
+	   6D 65 73 73 61
+	   67 65 29 00
+ 00000088 4F 75 74 20 6F	    dataEr  BYTE    "Out of range, try again",0
+	   66 20 72 61 6E
+	   67 65 2C 20 74
+	   72 79 20 61 67
+	   61 69 6E 00
+
+
+
+
+ 000000A0 00000000		    lpctr   DWORD   ?
+ 000000A4 00000000		    toCheck DWORD   ?
+ 000000A8 00000000		    flag    DWORD   ?
+ 000000AC 20 20 00		    space   BYTE    "  ",0
+
+ 000000AF 57 6F 75 6C 64	    prAgain BYTE    "Would you like to go again? (1 = y/0 = n)",0
 	   20 79 6F 75 20
 	   6C 69 6B 65 20
-	   74 6F 20 64 6F
-	   20 61 6E 6F 74
-	   68 65 72 20 63
-	   61 6C 63 75 6C
-	   61 74 69 6F 6E
-	   3F 20 28 31 20
-	   79 65 73 2F 30
-	   20 6E 6F 29 00
- 00000155 53 6F 72 72 79	    prLoLo  BYTE "Sorry, that value is too low, please try again", 0
-	   2C 20 74 68 61
-	   74 20 76 61 6C
-	   75 65 20 69 73
-	   20 74 6F 6F 20
-	   6C 6F 77 2C 20
-	   70 6C 65 61 73
-	   65 20 74 72 79
+	   74 6F 20 67 6F
 	   20 61 67 61 69
-	   6E 00
- 00000184 53 6F 72 72 79	    prHiLo  BYTE "Sorry, that value is too high, please try again", 0
-	   2C 20 74 68 61
-	   74 20 76 61 6C
-	   75 65 20 69 73
-	   20 74 6F 6F 20
-	   68 69 67 68 2C
-	   20 70 6C 65 61
-	   73 65 20 74 72
-	   79 20 61 67 61
-	   69 6E 00
- 000001B4 49 6E 70 75 74	    prLoHi  BYTE "Input must be >= lower bound, please try again", 0
-	   20 6D 75 73 74
-	   20 62 65 20 3E
-	   3D 20 6C 6F 77
-	   65 72 20 62 6F
-	   75 6E 64 2C 20
-	   70 6C 65 61 73
-	   65 20 74 72 79
-	   20 61 67 61 69
-	   6E 00
- 000001E3 2A 2A 2A 20 50	    prPrime BYTE "*** PRIME NUMBER ***",0
-	   52 49 4D 45 20
-	   4E 55 4D 42 45
-	   52 20 2A 2A 2A
-	   00
- 000001F8 57 6F 75 6C 64	    prAgain	BYTE "Would you like to do another calc? (0 = no / 1 = yes): ", 0
-	   20 79 6F 75 20
-	   6C 69 6B 65 20
-	   74 6F 20 64 6F
-	   20 61 6E 6F 74
-	   68 65 72 20 63
-	   61 6C 63 3F 20
-	   28 30 20 3D 20
-	   6E 6F 20 2F 20
-	   31 20 3D 20 79
-	   65 73 29 3A 20
-	   00
- 00000230 47 6F 6F 64 62		prExit	BYTE "Goodbye ", 0
-	   79 65 20 00
- 00000239 54 68 65 20 50	    prXC    BYTE "The Prime Number List extra credit option has been completed",0
-	   72 69 6D 65 20
-	   4E 75 6D 62 65
-	   72 20 4C 69 73
-	   74 20 65 78 74
-	   72 61 20 63 72
-	   65 64 69 74 20
-	   6F 70 74 69 6F
-	   6E 20 68 61 73
-	   20 62 65 65 6E
-	   20 63 6F 6D 70
-	   6C 65 74 65 64
-	   00
- 00000276 41 6C 6C 20 50	    prAlPrm BYTE "All Prime Numbers: ",0
-	   72 69 6D 65 20
-	   4E 75 6D 62 65
-	   72 73 3A 20 00
-				   
- 0000028A  00000021 [		    usName  BYTE 33 DUP(0)
-	    00
-	   ]
- 000002AB 00000000		    usLowr  DWORD ?
- 000002AF 00000000		    usHigh  DWORD ?
- 000002B3 00000000		   	usAgain DWORD ?
-
- 000002B7 00000000		    loopCt  DWORD ?
- 000002BB 3A 20 00		    colon   BYTE ": ",0
- 000002BE 20 00			    space   BYTE " ",0
- 000002C0 0000			    flag    WORD 0
- 000002C2 00000000		    stklim  DWORD 0
- 000002C6 00000002		    patch   DWORD 2
-
-
+	   6E 3F 20 28 31
+	   20 3D 20 79 2F
+	   30 20 3D 20 6E
+	   29 00
+ 000000D9 00000000		    usAgain DWORD   ?
+ 000000DD 43 6C 6F 73 69	    bye     BYTE    "Closing program. Goodbye",0
+	   6E 67 20 70 72
+	   6F 67 72 61 6D
+	   2E 20 47 6F 6F
+	   64 62 79 65 00
  00000000			.code
+
  00000000			main PROC
-
-				    ; intro program
- 00000000  BA 00000000 R	    mov     edx, OFFSET intro1
- 00000005  E8 00000000 E	    call    WriteString
- 0000000A  E8 00000000 E	    call    Crlf
- 0000000F  BA 0000001C R	    mov     edx, OFFSET intro2
- 00000014  E8 00000000 E	    call    WriteString
- 00000019  E8 00000000 E	    call    Crlf
- 0000001E  BA 00000239 R	    mov     edx, OFFSET prXC
- 00000023  E8 00000000 E	    call    WriteString
- 00000028  E8 00000000 E	    call    Crlf
-
-				    ; get name
- 0000002D  BA 0000009B R	    mov     edx, OFFSET prName
- 00000032  E8 00000000 E	    call    WriteString
 				    
- 00000037  BA 0000028A R	    mov     edx, OFFSET usName
- 0000003C  B9 00000020		    mov     ecx, 32
- 00000041  E8 00000000 E	    call    ReadString
- 00000046  E8 00000000 E	    call    Crlf
+ 00000000  E8 00000015		    CALL    intr
+ 00000005  E8 00000025		    CALL    getUsData
+ 0000000A  E8 00000060		    CALL    showComposites
+ 0000000F  E8 000000AB		    CALL    goAgain
+ 00000014  E8 000000D8		    CALL    theEnd
+ 00000019  C3			    RET
+ 0000001A			main ENDP
 
+ 0000001A			intr PROC
+ 0000001A  BA 00000000 R	    MOV     edx, OFFSET intro1
+ 0000001F  E8 00000000 E	    CALL    WRITESTRING
+ 00000024  E8 00000000 E	    CALL    CRLF
+ 00000029  E8 00000000 E	    CALL    CRLF
+ 0000002E  C3			    RET
+ 0000002F			intr ENDP
 
-				    ; get lower bound
- 0000004B			getLower:
- 0000004B  BA 000000AD R	    mov     edx, OFFSET prLowr
- 00000050  E8 00000000 E	    call    WriteString
-				    
- 00000055  E8 00000000 E	    call    ReadInt             ; stores in eax
- 0000005A  A3 000002AB R	    mov     usLowr, eax
- 0000005F  E8 00000000 E	    call    Crlf
-				    
-				    ; check if too low
- 00000064  83 3D 000002AB R	    cmp     usLowr, 1
-	   01
- 0000006B  7C 0E		    jl      lowerTooLow         ; if below 1
-				    
- 0000006D  81 3D 000002AB R	    cmp     usLowr, 1000
-	   000003E8
- 00000077  7F 13		    jg      lowerTooHigh
- 00000079  EB 22		    jmp     getHigher
+ 0000002F			getUsData PROC
+ 0000002F  BA 00000026 R	    MOV     edx, OFFSET data1   ; Print prompt for data
+ 00000034  E8 00000000 E	    CALL    WRITESTRING    
+ 00000039  E8 00000000 E	    CALL    READINT             ; Get user input
+ 0000003E  A3 00000067 R	    MOV     usLim, EAX
+ 00000043  E8 00000001		    CALL    validate
+ 00000048  C3			    ret
+ 00000049			getUsData ENDP
 
+ 00000049			validate PROC
+				    ; Verify if the user input is within the acceptable range
+ 00000049  A1 00000067 R	    MOV     EAX, usLim        ; Move the user input into EAX
+ 0000004E  83 F8 00		    CMP     EAX, LOWLIM       ; Compare with the lower limit
+ 00000051  7C 08		    JL      invalid           ; Jump to invalid if less than the lower limit
+ 00000053  3D 00000191		    CMP     EAX, UPPLIM       ; Compare with the upper limit
+ 00000058  7F 01		    JG      invalid           ; Jump to invalid if greater than the upper limit
+				    ; if all checks pass return to normal
+ 0000005A  C3			    RET
 
-				    ; if user input for lower bound is too low
- 0000007B			lowerTooLow:
- 0000007B  BA 00000155 R	    mov     edx, OFFSET prLoLo
- 00000080  E8 00000000 E	    call    WriteString
- 00000085  E8 00000000 E	    call    Crlf
- 0000008A  EB BF		    jmp     getLower
+ 0000005B			    invalid:
+				        ; Print error message and prompt user again
+ 0000005B  BA 00000088 R	        MOV     edx, OFFSET dataEr
+ 00000060  E8 00000000 E	        CALL    WRITESTRING
+ 00000065  E8 00000000 E	        CALL    CRLF
+ 0000006A  E8 FFFFFFC0		        CALL    getUsData        ; Prompt user again
+ 0000006F			validate ENDP
 
+				; everything above this sorta works
 
-				    ; if too high
- 0000008C			lowerTooHigh:
- 0000008C  BA 00000184 R	    mov     edx, OFFSET prHiLo
- 00000091  E8 00000000 E	    call    WriteString
- 00000096  E8 00000000 E	    call    Crlf
- 0000009B  EB AE		    jmp     getLower
+ 0000006F			showComposites PROC
+ 0000006F  8B 0D 00000067 R	    MOV     ECX, usLim
+ 00000075  49			    DEC     ECX     ; denominator needs to be less than numerator to check composites
 
-				    ; get higher bound
- 0000009D			getHigher:
- 0000009D  BA 000000E5 R	    mov     edx, OFFSET prHigh
- 000000A2  E8 00000000 E	    call    WriteString
-				    
- 000000A7  E8 00000000 E	    call    ReadInt             ; stores in eax
- 000000AC  A3 000002AF R	    mov     usHigh, eax
- 000000B1  E8 00000000 E	    call    Crlf
-				    
-				    ; check if too low
- 000000B6  A1 000002AB R	    mov     eax, usLowr
- 000000BB  39 05 000002AF R	    cmp     usHigh, eax
- 000000C1  7C 0E		    jl      higherTooLow       ; if below lower bound
-				    
- 000000C3  81 3D 000002AF R	    cmp     usHigh, LIM
-	   000003E9
- 000000CD  7F 13		    jg      higherTooHigh
- 000000CF  EB 22		    jmp     prepMath
+ 00000076			    outer:
+ 00000076  A1 00000067 R	        MOV     EAX, usLim
+ 0000007B  A3 000000A4 R	        MOV     toCheck, EAX
+ 00000080  29 0D 000000A4 R	        SUB     toCheck, ECX    ; start from 1 then increase as x decreases
 
+ 00000086  51			        PUSH    ECX     ; save for later
+ 00000087  8B 0D 000000A4 R	        MOV     ECX, toCheck
+ 0000008D  49			        DEC     ECX     ; start looking for valid denominators from check
 
-				    ; if user input for lower bound is too low
- 000000D1			higherTooLow:
- 000000D1  BA 000001B4 R	    mov     edx, OFFSET prLoHi
- 000000D6  E8 00000000 E	    call    WriteString
- 000000DB  E8 00000000 E	    call    Crlf
- 000000E0  EB BB		    jmp     getHigher
+ 0000008E			        inner:
+ 0000008E  BA 00000000		            MOV     EDX, 0 ; fill EDX for division
+				            
+ 00000093  83 F9 01		            CMP     ECX, 1
+ 00000096  7E 23		            JLE      restart ; dont check tocheck / 1, b/c this will always be 0
 
+ 00000098  A1 000000A4 R	            MOV     EAX, toCheck
+ 0000009D  F7 F1		            DIV     ECX
+ 0000009F  83 FA 00		            CMP     EDX, 0  ; if no remainder number is composite
+ 000000A2  74 04		            JE      print
 
-				    ; if too high
- 000000E2			higherTooHigh:
- 000000E2  BA 00000184 R	    mov     edx, OFFSET prHiLo
- 000000E7  E8 00000000 E	    call    WriteString
- 000000EC  E8 00000000 E	    call    Crlf
- 000000F1  EB AA		    jmp     getHigher
+ 000000A4  E2 E8		            LOOP    inner  ; otherwise restart
+ 000000A6  EB 13		            JMP     restart ; to skip over print once loop ends
+				            
+ 000000A8			            print:
+ 000000A8  8B D1		                MOV     EDX, ECX
+ 000000AA  E8 00000000 E	                CALL    WRITEDEC
+ 000000AF  BA 000000AC R	                MOV     EDX, OFFSET space
+ 000000B4  E8 00000000 E	                CALL    WRITESTRING
+ 000000B9  EB 00		                JMP     restart
 
-				    ; start calcs
- 000000F3			prepMath:
- 000000F3  8B 0D 000002AB R	    mov     ecx, usLowr
- 000000F9  49			    dec     ecx                 ; decrement by 1 so that foorloop can include an inc  
- 000000FA  8B 1D 000002AF R	    mov     ebx, usHigh         ; exclusive
- 00000100  43			    inc     ebx                 ; inc b/c exclusive
- 00000101  BA 00000000		    mov     edx, 0              ; prep for division
- 00000106  89 25 000002C2 R	    mov     stklim, esp         ;find stack starting point
- 0000010C  EB 00		    jmp     forLoop
+ 000000BB			            restart:
+ 000000BB  59			                POP     ECX
+ 000000BC  E2 B8		                LOOP    outer ; restore ECX and move to next number to check
+ 000000BE  C3			                RET
+				    ; outer loop will happen again after printing or after exhausting factors
+ 000000BF			showComposites ENDP
 
-				    ; do while ecx != ebx
- 0000010E			forLoop:
- 0000010E  E8 00000000 E	    call    crlf
- 00000113  66| C7 05		    mov     flag, 0
-	   000002C0 R
-	   0000
+ 000000BF			goAgain PROC
+ 000000BF  E8 00000000 E	    call    Crlf
+ 000000C4  BA 000000AF R	    mov     edx, OFFSET prAgain
+ 000000C9  E8 00000000 E		call    WriteString
+ 000000CE  E8 00000000 E		call    Crlf
 
- 0000011C  41			    inc     ecx
- 0000011D  3B CB		    cmp     ecx, ebx
- 0000011F  0F 84 000000B2	    je      printAllPrimesPrep
-
-				    ;print number to check
- 00000125  8B C1		    mov     eax, ecx
- 00000127  E8 00000000 E	    call    WriteDec
- 0000012C  BA 000002BB R	    mov     edx, OFFSET colon
- 00000131  E8 00000000 E	    call    WriteString
- 00000136  B8 00000001		    mov     eax, 1
- 0000013B  E8 00000000 E	    call    WriteDec
- 00000140  BA 000002BE R	    mov     edx, OFFSET space
- 00000145  E8 00000000 E	    call    WriteString
-
-				    ;start at 2 b/c 1 is always a factor
- 0000014A  C7 05 000002B7 R	    mov     loopCt, 2
-	   00000002
- 00000154  EB 00		    jmp     innerLoop
-
-				  
-				    ; run inner loop
- 00000156			innerLoop:
- 00000156  39 0D 000002B7 R	    cmp     loopCt, ecx           ; while j < i
- 0000015C  7D 1A		    jge     checkPrime
-
- 0000015E  8B C1		    mov     eax, ecx
- 00000160  BA 00000000		    mov     edx, 0
- 00000165  F7 35 000002B7 R	    div     loopCt
-
- 0000016B  83 FA 00		    cmp     edx, 0                 ; check for remainder
- 0000016E  74 1E		    je      printFactor
-
- 00000170  FF 05 000002B7 R	    inc     loopCt
- 00000176  EB DE		    jmp     innerLoop        
-				    
-
-				    ;if there were no factors found then the number was prime
- 00000178			checkPrime:
- 00000178  66| 83 3D		    cmp     flag, 0
-	   000002C0 R 00
- 00000180  74 31		    je      printPrime
- 00000182  A1 000002B7 R	    mov     eax, loopCt
- 00000187  E8 00000000 E	    call    WriteDec
- 0000018C  EB 80		    jmp forLoop
-
-
-				    ; if no remainder print factor
- 0000018E			printFactor:
- 0000018E  66| C7 05		    mov     flag, 1
-	   000002C0 R
-	   0001
- 00000197  A1 000002B7 R	    mov     eax, loopCt
- 0000019C  E8 00000000 E	    call    WriteDec
- 000001A1  BA 000002BE R	    mov     edx, OFFSET space
- 000001A6  E8 00000000 E	    call    WriteString
-
- 000001AB  FF 05 000002B7 R	    inc     loopCt
- 000001B1  EB A3		    jmp     innerLoop
-
-
- 000001B3			printPrime:
-				    ; print that number was prime and push it to stack for later
- 000001B3  A1 000002B7 R	    mov     eax, loopCt
- 000001B8  50			    push    eax
- 000001B9  E8 00000000 E	    call    WriteDec
- 000001BE  BA 000002BE R	    mov     edx, OFFSET space
- 000001C3  E8 00000000 E	    call    WriteString
- 000001C8  BA 000001E3 R	    mov     edx, OFFSET prPrime
- 000001CD  E8 00000000 E	    call    WriteString
-
- 000001D2  E9 FFFFFF37		    jmp     forLoop
-
-				 
-				    ;jump out of program, ask about going again
-
- 000001D7			printAllPrimesPrep:
- 000001D7  BA 00000276 R	    mov     edx, OFFSET prAlPrm
- 000001DC  E8 00000000 E	    call    WriteString
-
- 000001E1  EB 00		    jmp     printAllPrimes
-
- 000001E3			printAllPrimes:
- 000001E3  3B 25 000002C2 R	    cmp     esp, stklim
- 000001E9  74 2F		    je      continue
- 000001EB  58			    pop     eax                         ; pop stack into eax
- 000001EC  83 F8 02		    cmp     eax, 2                      ; patch for 2 being printed twice. idfk
- 000001EF  74 13		    je      exitTwo
- 000001F1  EB 00		    jmp     actuallyPrintPrimes
-
- 000001F3			actuallyPrintPrimes:
- 000001F3  E8 00000000 E	    call    WriteDec
- 000001F8  BA 000002BE R	    mov     edx, OFFSET space
- 000001FD  E8 00000000 E	    call    WriteString
- 00000202  EB DF		    jmp     printAllPrimes
-
-
- 00000204			exitTwo:                                ; to stop 2 from being printed twice just do it by hand
- 00000204  B8 00000002		    mov     eax, 2
- 00000209  E8 00000000 E	    call    WriteDec
- 0000020E  BA 000002BE R	    mov     edx, OFFSET space
- 00000213  E8 00000000 E	    call    WriteString
- 00000218  EB 00		    jmp     continue
-
-
- 0000021A			continue:
- 0000021A  E8 00000000 E	    call    Crlf
- 0000021F  BA 000001F8 R	    mov     edx, OFFSET prAgain
- 00000224  E8 00000000 E		call    WriteString
- 00000229  E8 00000000 E		call    Crlf
-
- 0000022E  E8 00000000 E		call	ReadInt		                ;get input
- 00000233  A3 000002B3 R		mov		usAgain, eax
- 00000238  E8 00000000 E		call	Crlf
+ 000000D3  E8 00000000 E		call	ReadInt		                ;get input
+ 000000D8  A3 000000D9 R		mov		usAgain, eax
+ 000000DD  E8 00000000 E		call	Crlf
 
 					; 8.1 check user input
- 0000023D  83 3D 000002B3 R		cmp usAgain, 0		            ;Important, check against int, not char
+ 000000E2  83 3D 000000D9 R		cmp usAgain, 0		            ;Important, check against int, not char
 	   00
- 00000244  0F 85 FFFFFE01		jne getLower                    ; jump to doCalcs if usAgain is not equal to 0
- 0000024A  74 00			je endProg                      ; jump to endProg if usAgain is equal to 0
+ 000000E9  75 01			jne restart                    ; jump to doCalcs if usAgain is not equal to 0
+ 000000EB  C3			    RET
 
+ 000000EC			    restart:
+ 000000EC  E8 FFFFFF0F		        CALL    main    ;restart program
+ 000000F1			goagain ENDP
 
- 0000024C			endProg:
- 0000024C  BA 00000230 R		mov edx, OFFSET prExit
- 00000251  E8 00000000 E		call WriteString
-					
- 00000256  BA 0000028A R		mov edx, OFFSET usName
- 0000025B  E8 00000000 E		call WriteString
+ 000000F1			theEnd PROC
+ 000000F1  BA 000000DD R		mov edx, OFFSET bye
+ 000000F6  E8 00000000 E		call WriteString
+ 000000FB  C3			    RET
+ 000000FC			theEnd ENDP
 
-				    exit
- 00000260  6A 00	   *	    push   +000000000h
- 00000262  E8 00000000 E   *	    call   ExitProcess
- 00000267			main ENDP
 
 				END main
-Microsoft (R) Macro Assembler Version 14.35.32216.1	    02/01/24 16:29:36
-Assignment2 (hw2.asm					     Symbols 2 - 1
+Microsoft (R) Macro Assembler Version 14.35.32216.1	    02/20/24 17:38:52
+Assignment3 (hw3.asm					     Symbols 2 - 1
 
 
 
@@ -529,8 +306,8 @@ Segments and Groups:
 
 FLAT . . . . . . . . . . . . . .	GROUP
 STACK  . . . . . . . . . . . . .	32 Bit	 00001000 Para	  Stack	  'STACK'	 
-_DATA  . . . . . . . . . . . . .	32 Bit	 000002CA Para	  Public  'DATA'	
-_TEXT  . . . . . . . . . . . . .	32 Bit	 00000267 Para	  Public  'CODE'	
+_DATA  . . . . . . . . . . . . .	32 Bit	 000000F6 Para	  Public  'DATA'	
+_TEXT  . . . . . . . . . . . . .	32 Bit	 000000FC Para	  Public  'CODE'	
 
 
 Procedures, parameters, and locals:
@@ -637,27 +414,21 @@ WriteStackFrame  . . . . . . . .	P Near	 00000000 FLAT	Length= 00000000 External
 WriteString  . . . . . . . . . .	P Near	 00000000 FLAT	Length= 00000000 External STDCALL
 WriteToFile  . . . . . . . . . .	P Near	 00000000 FLAT	Length= 00000000 External STDCALL
 WriteWindowsMsg  . . . . . . . .	P Near	 00000000 FLAT	Length= 00000000 External STDCALL
-main . . . . . . . . . . . . . .	P Near	 00000000 _TEXT	Length= 00000267 Public STDCALL
-  getLower . . . . . . . . . . .	L Near	 0000004B _TEXT	
-  lowerTooLow  . . . . . . . . .	L Near	 0000007B _TEXT	
-  lowerTooHigh . . . . . . . . .	L Near	 0000008C _TEXT	
-  getHigher  . . . . . . . . . .	L Near	 0000009D _TEXT	
-  higherTooLow . . . . . . . . .	L Near	 000000D1 _TEXT	
-  higherTooHigh  . . . . . . . .	L Near	 000000E2 _TEXT	
-  prepMath . . . . . . . . . . .	L Near	 000000F3 _TEXT	
-  forLoop  . . . . . . . . . . .	L Near	 0000010E _TEXT	
-  innerLoop  . . . . . . . . . .	L Near	 00000156 _TEXT	
-  checkPrime . . . . . . . . . .	L Near	 00000178 _TEXT	
-  printFactor  . . . . . . . . .	L Near	 0000018E _TEXT	
-  printPrime . . . . . . . . . .	L Near	 000001B3 _TEXT	
-  printAllPrimesPrep . . . . . .	L Near	 000001D7 _TEXT	
-  printAllPrimes . . . . . . . .	L Near	 000001E3 _TEXT	
-  actuallyPrintPrimes  . . . . .	L Near	 000001F3 _TEXT	
-  exitTwo  . . . . . . . . . . .	L Near	 00000204 _TEXT	
-  continue . . . . . . . . . . .	L Near	 0000021A _TEXT	
-  endProg  . . . . . . . . . . .	L Near	 0000024C _TEXT	
+getUsData  . . . . . . . . . . .	P Near	 0000002F _TEXT	Length= 0000001A Public STDCALL
+goAgain  . . . . . . . . . . . .	P Near	 000000BF _TEXT	Length= 00000032 Public STDCALL
+  restart  . . . . . . . . . . .	L Near	 000000EC _TEXT	
+intr . . . . . . . . . . . . . .	P Near	 0000001A _TEXT	Length= 00000015 Public STDCALL
+main . . . . . . . . . . . . . .	P Near	 00000000 _TEXT	Length= 0000001A Public STDCALL
 printf . . . . . . . . . . . . .	P Near	 00000000 FLAT	Length= 00000000 External C
 scanf  . . . . . . . . . . . . .	P Near	 00000000 FLAT	Length= 00000000 External C
+showComposites . . . . . . . . .	P Near	 0000006F _TEXT	Length= 00000050 Public STDCALL
+  outer  . . . . . . . . . . . .	L Near	 00000076 _TEXT	
+  inner  . . . . . . . . . . . .	L Near	 0000008E _TEXT	
+  print  . . . . . . . . . . . .	L Near	 000000A8 _TEXT	
+  restart  . . . . . . . . . . .	L Near	 000000BB _TEXT	
+theEnd . . . . . . . . . . . . .	P Near	 000000F1 _TEXT	Length= 0000000B Public STDCALL
+validate . . . . . . . . . . . .	P Near	 00000049 _TEXT	Length= 00000026 Public STDCALL
+  invalid  . . . . . . . . . . .	L Near	 0000005B _TEXT	
 wsprintfA  . . . . . . . . . . .	P Near	 00000000 FLAT	Length= 00000000 External C
 
 
@@ -747,7 +518,7 @@ KEY_EVENT  . . . . . . . . . . .	Number	 00000001h
 KEY_MASKS  . . . . . . . . . . .	Number	 0000001Fh   
 LEFT_ALT_PRESSED . . . . . . . .	Number	 00000002h   
 LEFT_CTRL_PRESSED  . . . . . . .	Number	 00000008h   
-LIM  . . . . . . . . . . . . . .	Number	 000003E9h   
+LOWLIM . . . . . . . . . . . . .	Number	 00000000h   
 MB_ABORTRETRYIGNORE  . . . . . .	Number	 00000002h   
 MB_APPLMODAL . . . . . . . . . .	Number	 00000000h   
 MB_CANCELTRYCONTINUE . . . . . .	Number	 00000006h   
@@ -794,6 +565,7 @@ SetConsoleTitle  . . . . . . . .	Text   	 SetConsoleTitleA
 TAB  . . . . . . . . . . . . . .	Number	 00000009h   
 TRUE . . . . . . . . . . . . . .	Number	 00000001h   
 TRUNCATE_EXISTING  . . . . . . .	Number	 00000005h   
+UPPLIM . . . . . . . . . . . . .	Number	 00000191h   
 VK_11  . . . . . . . . . . . . .	Number	 000000BDh   
 VK_12  . . . . . . . . . . . . .	Number	 000000BBh   
 VK_ADD . . . . . . . . . . . . .	Number	 0000006Bh   
@@ -878,42 +650,30 @@ WriteConsole . . . . . . . . . .	Text   	 WriteConsoleA
 black  . . . . . . . . . . . . .	Number	 00000000h   
 blue . . . . . . . . . . . . . .	Number	 00000001h   
 brown  . . . . . . . . . . . . .	Number	 00000006h   
-colon  . . . . . . . . . . . . .	Byte	 000002BB _DATA	
+bye  . . . . . . . . . . . . . .	Byte	 000000DD _DATA	
 cyan . . . . . . . . . . . . . .	Number	 00000003h   
+data1  . . . . . . . . . . . . .	Byte	 00000026 _DATA	
+dataEr . . . . . . . . . . . . .	Byte	 00000088 _DATA	
+debug1 . . . . . . . . . . . . .	Byte	 0000006B _DATA	
 exit . . . . . . . . . . . . . .	Text   	 INVOKE ExitProcess,0
-flag . . . . . . . . . . . . . .	Word	 000002C0 _DATA	
+flag . . . . . . . . . . . . . .	DWord	 000000A8 _DATA	
 gray . . . . . . . . . . . . . .	Number	 00000008h   
 green  . . . . . . . . . . . . .	Number	 00000002h   
 intro1 . . . . . . . . . . . . .	Byte	 00000000 _DATA	
-intro2 . . . . . . . . . . . . .	Byte	 0000001C _DATA	
 lightBlue  . . . . . . . . . . .	Number	 00000009h   
 lightCyan  . . . . . . . . . . .	Number	 0000000Bh   
 lightGray  . . . . . . . . . . .	Number	 00000007h   
 lightGreen . . . . . . . . . . .	Number	 0000000Ah   
 lightMagenta . . . . . . . . . .	Number	 0000000Dh   
 lightRed . . . . . . . . . . . .	Number	 0000000Ch   
-loopCt . . . . . . . . . . . . .	DWord	 000002B7 _DATA	
+lpctr  . . . . . . . . . . . . .	DWord	 000000A0 _DATA	
 magenta  . . . . . . . . . . . .	Number	 00000005h   
-patch  . . . . . . . . . . . . .	DWord	 000002C6 _DATA	
-prAgain  . . . . . . . . . . . .	Byte	 000001F8 _DATA	
-prAgin . . . . . . . . . . . . .	Byte	 0000011E _DATA	
-prAlPrm  . . . . . . . . . . . .	Byte	 00000276 _DATA	
-prExit . . . . . . . . . . . . .	Byte	 00000230 _DATA	
-prHiLo . . . . . . . . . . . . .	Byte	 00000184 _DATA	
-prHigh . . . . . . . . . . . . .	Byte	 000000E5 _DATA	
-prLoHi . . . . . . . . . . . . .	Byte	 000001B4 _DATA	
-prLoLo . . . . . . . . . . . . .	Byte	 00000155 _DATA	
-prLowr . . . . . . . . . . . . .	Byte	 000000AD _DATA	
-prName . . . . . . . . . . . . .	Byte	 0000009B _DATA	
-prPrime  . . . . . . . . . . . .	Byte	 000001E3 _DATA	
-prXC . . . . . . . . . . . . . .	Byte	 00000239 _DATA	
+prAgain  . . . . . . . . . . . .	Byte	 000000AF _DATA	
 red  . . . . . . . . . . . . . .	Number	 00000004h   
-space  . . . . . . . . . . . . .	Byte	 000002BE _DATA	
-stklim . . . . . . . . . . . . .	DWord	 000002C2 _DATA	
-usAgain  . . . . . . . . . . . .	DWord	 000002B3 _DATA	
-usHigh . . . . . . . . . . . . .	DWord	 000002AF _DATA	
-usLowr . . . . . . . . . . . . .	DWord	 000002AB _DATA	
-usName . . . . . . . . . . . . .	Byte	 0000028A _DATA	
+space  . . . . . . . . . . . . .	Byte	 000000AC _DATA	
+toCheck  . . . . . . . . . . . .	DWord	 000000A4 _DATA	
+usAgain  . . . . . . . . . . . .	DWord	 000000D9 _DATA	
+usLim  . . . . . . . . . . . . .	DWord	 00000067 _DATA	
 white  . . . . . . . . . . . . .	Number	 0000000Fh   
 wsprintf . . . . . . . . . . . .	Text   	 wsprintfA
 yellow . . . . . . . . . . . . .	Number	 0000000Eh   
