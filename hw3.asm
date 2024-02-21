@@ -22,6 +22,8 @@ LOWLIM     EQU     4    ; b/c 1 breaks
     debug1  BYTE    "data is good (debug message)",0
     dataEr  BYTE    "Out of range, try again",0
 
+    lnctr   DWORD   0
+
 
 
 
@@ -114,11 +116,20 @@ showComposites PROC
             JMP     restart ; to skip over print once loop ends
             
             print:
-                MOV     EAX, toCheck
-                CALL    WRITEDEC
-                MOV     EDX, OFFSET space
-                CALL    WRITESTRING
-                JMP     restart
+                inc     lnctr
+                cmp     lnctr, 11   ;at most 10 per line
+                je      newline
+                jmp     printNum
+
+                newline:
+                    CALL    CRLF
+                    mov     lnctr, 1
+                printNum:
+                    MOV     EAX, toCheck
+                    CALL    WRITEDEC
+                    MOV     EDX, OFFSET space
+                    CALL    WRITESTRING
+                    JMP     restart
 
             restart:
                 POP     ECX

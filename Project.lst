@@ -1,4 +1,4 @@
-Microsoft (R) Macro Assembler Version 14.35.32216.1	    02/20/24 18:02:13
+Microsoft (R) Macro Assembler Version 14.35.32216.1	    02/20/24 18:20:44
 Assignment3 (hw3.asm					     Page 1 - 1
 
 
@@ -28,7 +28,7 @@ Microsoft (R) Macro Assembler Version 14.35.32216.1	    02/20/24 18:02:13
 			      C 
 
  = 00000190			UPPLIM     EQU     400
- = 00000002			LOWLIM     EQU     2
+ = 00000004			LOWLIM     EQU     4    ; b/c 1 breaks
 
  00000000			.data
 				    ; variable definitions
@@ -45,7 +45,7 @@ Microsoft (R) Macro Assembler Version 14.35.32216.1	    02/20/24 18:02:13
 	   79 20 4C 6F 70
 	   65 7A 00
 				    
- 00000026 45 6E 74 65 72	    data1   BYTE    "Enter the number of composites to display, up to 400 (inclusive)",0
+ 00000026 45 6E 74 65 72	    data1   BYTE    "Enter the number of composites to display, from [4-100] (b/c the first composite number is 4)",0
 	   20 74 68 65 20
 	   6E 75 6D 62 65
 	   72 20 6F 66 20
@@ -53,33 +53,41 @@ Microsoft (R) Macro Assembler Version 14.35.32216.1	    02/20/24 18:02:13
 	   73 69 74 65 73
 	   20 74 6F 20 64
 	   69 73 70 6C 61
-	   79 2C 20 75 70
-	   20 74 6F 20 34
-	   30 30 20 28 69
-	   6E 63 6C 75 73
-	   69 76 65 29 00
- 00000067 00000000		    usLim   DWORD   ?
- 0000006B 64 61 74 61 20	    debug1  BYTE    "data is good (debug message)",0
+	   79 2C 20 66 72
+	   6F 6D 20 5B 34
+	   2D 31 30 30 5D
+	   20 28 62 2F 63
+	   20 74 68 65 20
+	   66 69 72 73 74
+	   20 63 6F 6D 70
+	   6F 73 69 74 65
+	   20 6E 75 6D 62
+	   65 72 20 69 73
+	   20 34 29 00
+ 00000084 00000000		    usLim   DWORD   ?
+ 00000088 64 61 74 61 20	    debug1  BYTE    "data is good (debug message)",0
 	   69 73 20 67 6F
 	   6F 64 20 28 64
 	   65 62 75 67 20
 	   6D 65 73 73 61
 	   67 65 29 00
- 00000088 4F 75 74 20 6F	    dataEr  BYTE    "Out of range, try again",0
+ 000000A5 4F 75 74 20 6F	    dataEr  BYTE    "Out of range, try again",0
 	   66 20 72 61 6E
 	   67 65 2C 20 74
 	   72 79 20 61 67
 	   61 69 6E 00
 
+ 000000BD 00000000		    lnctr   DWORD   0
 
 
 
- 000000A0 00000000		    lpctr   DWORD   ?
- 000000A4 00000000		    toCheck DWORD   ?
- 000000A8 00000000		    flag    DWORD   ?
- 000000AC 20 20 00		    space   BYTE    "  ",0
 
- 000000AF 57 6F 75 6C 64	    prAgain BYTE    "Would you like to go again? (1 = y/0 = n)",0
+ 000000C1 00000000		    lpctr   DWORD   ?
+ 000000C5 00000000		    toCheck DWORD   ?
+ 000000C9 00000000		    flag    DWORD   ?
+ 000000CD 20 20 00		    space   BYTE    "  ",0
+
+ 000000D0 57 6F 75 6C 64	    prAgain BYTE    "Would you like to go again? (1 = y/0 = n)",0
 	   20 79 6F 75 20
 	   6C 69 6B 65 20
 	   74 6F 20 67 6F
@@ -88,8 +96,8 @@ Microsoft (R) Macro Assembler Version 14.35.32216.1	    02/20/24 18:02:13
 	   20 3D 20 79 2F
 	   30 20 3D 20 6E
 	   29 00
- 000000D9 00000000		    usAgain DWORD   ?
- 000000DD 43 6C 6F 73 69	    bye     BYTE    "Closing program. Goodbye",0
+ 000000FA 00000000		    usAgain DWORD   ?
+ 000000FE 43 6C 6F 73 69	    bye     BYTE    "Closing program. Goodbye",0
 	   6E 67 20 70 72
 	   6F 67 72 61 6D
 	   2E 20 47 6F 6F
@@ -101,11 +109,12 @@ Microsoft (R) Macro Assembler Version 14.35.32216.1	    02/20/24 18:02:13
  00000000  E8 00000015		    CALL    intr
  00000005  E8 00000025		    CALL    getUsData
  0000000A  E8 00000060		    CALL    showComposites
- 0000000F  E8 000000AE		    CALL    goAgain
- 00000014  E8 000000DB		    CALL    theEnd
+ 0000000F  E8 000000CE		    CALL    goAgain
+ 00000014  E8 000000FB		    CALL    theEnd
  00000019  C3			    RET
  0000001A			main ENDP
 
+				; Prints out the instructions for the program. Touches EDX. No significant pre/post conditions
  0000001A			intr PROC
  0000001A  BA 00000000 R	    MOV     edx, OFFSET intro1
  0000001F  E8 00000000 E	    CALL    WRITESTRING
@@ -114,19 +123,21 @@ Microsoft (R) Macro Assembler Version 14.35.32216.1	    02/20/24 18:02:13
  0000002E  C3			    RET
  0000002F			intr ENDP
 
+				; gets user data. uses EDX, EAX. no prec. post condition: calls validate to check usLim
  0000002F			getUsData PROC
  0000002F  BA 00000026 R	    MOV     edx, OFFSET data1   ; Print prompt for data
  00000034  E8 00000000 E	    CALL    WRITESTRING    
  00000039  E8 00000000 E	    CALL    READINT             ; Get user input
- 0000003E  A3 00000067 R	    MOV     usLim, EAX
+ 0000003E  A3 00000084 R	    MOV     usLim, EAX
  00000043  E8 00000001		    CALL    validate
  00000048  C3			    ret
  00000049			getUsData ENDP
 
+				; verifies usLim is within valid range. Uses EAX, EDX. Prec: usLim is filled. Post: either data is called again, or funciton returns thru data to main.
  00000049			validate PROC
 				    ; Verify if the user input is within the acceptable range
- 00000049  A1 00000067 R	    MOV     EAX, usLim        ; Move the user input into EAX
- 0000004E  83 F8 02		    CMP     EAX, LOWLIM       ; Compare with the lower limit
+ 00000049  A1 00000084 R	    MOV     EAX, usLim        ; Move the user input into EAX
+ 0000004E  83 F8 04		    CMP     EAX, LOWLIM       ; Compare with the lower limit
  00000051  7C 08		    JL      invalid           ; Jump to invalid if less than the lower limit
  00000053  3D 00000190		    CMP     EAX, UPPLIM       ; Compare with the upper limit
  00000058  7F 01		    JG      invalid           ; Jump to invalid if greater than the upper limit
@@ -135,86 +146,100 @@ Microsoft (R) Macro Assembler Version 14.35.32216.1	    02/20/24 18:02:13
 
  0000005B			    invalid:
 				        ; Print error message and prompt user again
- 0000005B  BA 00000088 R	        MOV     edx, OFFSET dataEr
+ 0000005B  BA 000000A5 R	        MOV     edx, OFFSET dataEr
  00000060  E8 00000000 E	        CALL    WRITESTRING
  00000065  E8 00000000 E	        CALL    CRLF
  0000006A  E8 FFFFFFC0		        CALL    getUsData        ; Prompt user again
  0000006F			validate ENDP
 
-				; everything above this sorta works
-
+				; print out every composite number up to usLim. Uses ECX, EAX, EDX, and 1 stack slot. Prec: usLim has been verified. Post: return to main after printing
+				; outer iterates through numbers to be checked, using push/pop to store ECX between iterations. 
+				; inner checks each factor until composite or not is determined
  0000006F			showComposites PROC
- 0000006F  8B 0D 00000067 R	    MOV     ECX, usLim
+ 0000006F  8B 0D 00000084 R	    MOV     ECX, usLim
  00000075  49			    DEC     ECX     ; denominator needs to be less than numerator to check composites
 
  00000076			    outer:
- 00000076  A1 00000067 R	        MOV     EAX, usLim
- 0000007B  A3 000000A4 R	        MOV     toCheck, EAX
- 00000080  29 0D 000000A4 R	        SUB     toCheck, ECX    ; start from 1 then increase as x decreases
+ 00000076  A1 00000084 R	        MOV     EAX, usLim
+ 0000007B  A3 000000C5 R	        MOV     toCheck, EAX
+ 00000080  29 0D 000000C5 R	        SUB     toCheck, ECX    ; start from 1 then increase as x decreases
 
  00000086  51			        PUSH    ECX     ; save for later
- 00000087  8B 0D 000000A4 R	        MOV     ECX, toCheck
+ 00000087  8B 0D 000000C5 R	        MOV     ECX, toCheck
  0000008D  49			        DEC     ECX     ; start looking for valid denominators from check
 
  0000008E			        inner:
  0000008E  BA 00000000		            MOV     EDX, 0 ; fill EDX for division
 				            
  00000093  83 F9 01		            CMP     ECX, 1
- 00000096  7E 26		            JLE     restart ; dont check tocheck / 1, b/c this will always be 0
+ 00000096  7E 46		            JLE     restart ; dont check tocheck / 1, b/c this will always be 0
 
- 00000098  A1 000000A4 R	            MOV     EAX, toCheck
+ 00000098  A1 000000C5 R	            MOV     EAX, toCheck
  0000009D  F7 F1		            DIV     ECX
  0000009F  83 FA 00		            CMP     EDX, 0  ; if no remainder number is composite
  000000A2  74 04		            JE      print
 
  000000A4  E2 E8		            LOOP    inner  ; otherwise restart
- 000000A6  EB 16		            JMP     restart ; to skip over print once loop ends
+ 000000A6  EB 36		            JMP     restart ; to skip over print once loop ends
 				            
  000000A8			            print:
- 000000A8  A1 000000A4 R	                MOV     EAX, toCheck
- 000000AD  E8 00000000 E	                CALL    WRITEDEC
- 000000B2  BA 000000AC R	                MOV     EDX, OFFSET space
- 000000B7  E8 00000000 E	                CALL    WRITESTRING
- 000000BC  EB 00		                JMP     restart
+ 000000A8  FF 05 000000BD R	                inc     lnctr
+ 000000AE  83 3D 000000BD R	                cmp     lnctr, 11   ;at most 10 per line
+	   0B
+ 000000B5  74 02		                je      newline
+ 000000B7  EB 0F		                jmp     printNum
 
- 000000BE			            restart:
- 000000BE  59			                POP     ECX
- 000000BF  E2 B5		                LOOP    outer ; restore ECX and move to next number to check
- 000000C1  C3			                RET
+ 000000B9			                newline:
+ 000000B9  E8 00000000 E	                    CALL    CRLF
+ 000000BE  C7 05 000000BD R	                    mov     lnctr, 1
+	   00000001
+ 000000C8			                printNum:
+ 000000C8  A1 000000C5 R	                    MOV     EAX, toCheck
+ 000000CD  E8 00000000 E	                    CALL    WRITEDEC
+ 000000D2  BA 000000CD R	                    MOV     EDX, OFFSET space
+ 000000D7  E8 00000000 E	                    CALL    WRITESTRING
+ 000000DC  EB 00		                    JMP     restart
+
+ 000000DE			            restart:
+ 000000DE  59			                POP     ECX
+ 000000DF  E2 95		                LOOP    outer ; restore ECX and move to next number to check
+ 000000E1  C3			                RET
 				    ; outer loop will happen again after printing or after exhausting factors
- 000000C2			showComposites ENDP
+ 000000E2			showComposites ENDP
 
- 000000C2			goAgain PROC
- 000000C2  E8 00000000 E	    call    Crlf
- 000000C7  BA 000000AF R	    mov     edx, OFFSET prAgain
- 000000CC  E8 00000000 E		call    WriteString
- 000000D1  E8 00000000 E		call    Crlf
+				; asks if user wants to repeat program. uses EDX, EAX. no strict PREC. Post: user returns to main or restarts main.
+ 000000E2			goAgain PROC
+ 000000E2  E8 00000000 E	    call    Crlf
+ 000000E7  BA 000000D0 R	    mov     edx, OFFSET prAgain
+ 000000EC  E8 00000000 E		call    WriteString
+ 000000F1  E8 00000000 E		call    Crlf
 
- 000000D6  E8 00000000 E		call	ReadInt		                ;get input
- 000000DB  A3 000000D9 R		mov		usAgain, eax
- 000000E0  E8 00000000 E		call	Crlf
+ 000000F6  E8 00000000 E		call	ReadInt		                ;get input
+ 000000FB  A3 000000FA R		mov		usAgain, eax
+ 00000100  E8 00000000 E		call	Crlf
 
 					; 8.1 check user input
- 000000E5  83 3D 000000D9 R		cmp usAgain, 0		            ;Important, check against int, not char
+ 00000105  83 3D 000000FA R		cmp usAgain, 0		            ;Important, check against int, not char
 	   00
- 000000EC  75 01			jne restart                    ; jump to doCalcs if usAgain is not equal to 0
- 000000EE  C3			    RET
+ 0000010C  75 01			jne restart                    ; jump to doCalcs if usAgain is not equal to 0
+ 0000010E  C3			    RET
 
- 000000EF			    restart:
- 000000EF  E8 FFFFFF0C		        CALL    main    ;restart program
- 000000F4			goagain ENDP
+ 0000010F			    restart:
+ 0000010F  E8 FFFFFEEC		        CALL    main    ;restart program
+ 00000114			goagain ENDP
 
- 000000F4			theEnd PROC
- 000000F4  BA 000000DD R		mov edx, OFFSET bye
- 000000F9  E8 00000000 E		call WriteString
+				; end program. EDX. PREC: user got here by choosing no in goAgain. Post: program exits.
+ 00000114			theEnd PROC
+ 00000114  BA 000000FE R		mov edx, OFFSET bye
+ 00000119  E8 00000000 E		call WriteString
 				    EXIT    ;shoot self in foot to exit early so main doesnt call this multiple times
- 000000FE  6A 00	   *	    push   +000000000h
- 00000100  E8 00000000 E   *	    call   ExitProcess
- 00000105			theEnd ENDP
+ 0000011E  6A 00	   *	    push   +000000000h
+ 00000120  E8 00000000 E   *	    call   ExitProcess
+ 00000125			theEnd ENDP
 
 
 				END main
-Microsoft (R) Macro Assembler Version 14.35.32216.1	    02/20/24 18:02:13
+Microsoft (R) Macro Assembler Version 14.35.32216.1	    02/20/24 18:20:44
 Assignment3 (hw3.asm					     Symbols 2 - 1
 
 
@@ -308,8 +333,8 @@ Segments and Groups:
 
 FLAT . . . . . . . . . . . . . .	GROUP
 STACK  . . . . . . . . . . . . .	32 Bit	 00001000 Para	  Stack	  'STACK'	 
-_DATA  . . . . . . . . . . . . .	32 Bit	 000000F6 Para	  Public  'DATA'	
-_TEXT  . . . . . . . . . . . . .	32 Bit	 00000105 Para	  Public  'CODE'	
+_DATA  . . . . . . . . . . . . .	32 Bit	 00000117 Para	  Public  'DATA'	
+_TEXT  . . . . . . . . . . . . .	32 Bit	 00000125 Para	  Public  'CODE'	
 
 
 Procedures, parameters, and locals:
@@ -417,18 +442,20 @@ WriteString  . . . . . . . . . .	P Near	 00000000 FLAT	Length= 00000000 External
 WriteToFile  . . . . . . . . . .	P Near	 00000000 FLAT	Length= 00000000 External STDCALL
 WriteWindowsMsg  . . . . . . . .	P Near	 00000000 FLAT	Length= 00000000 External STDCALL
 getUsData  . . . . . . . . . . .	P Near	 0000002F _TEXT	Length= 0000001A Public STDCALL
-goAgain  . . . . . . . . . . . .	P Near	 000000C2 _TEXT	Length= 00000032 Public STDCALL
-  restart  . . . . . . . . . . .	L Near	 000000EF _TEXT	
+goAgain  . . . . . . . . . . . .	P Near	 000000E2 _TEXT	Length= 00000032 Public STDCALL
+  restart  . . . . . . . . . . .	L Near	 0000010F _TEXT	
 intr . . . . . . . . . . . . . .	P Near	 0000001A _TEXT	Length= 00000015 Public STDCALL
 main . . . . . . . . . . . . . .	P Near	 00000000 _TEXT	Length= 0000001A Public STDCALL
 printf . . . . . . . . . . . . .	P Near	 00000000 FLAT	Length= 00000000 External C
 scanf  . . . . . . . . . . . . .	P Near	 00000000 FLAT	Length= 00000000 External C
-showComposites . . . . . . . . .	P Near	 0000006F _TEXT	Length= 00000053 Public STDCALL
+showComposites . . . . . . . . .	P Near	 0000006F _TEXT	Length= 00000073 Public STDCALL
   outer  . . . . . . . . . . . .	L Near	 00000076 _TEXT	
   inner  . . . . . . . . . . . .	L Near	 0000008E _TEXT	
   print  . . . . . . . . . . . .	L Near	 000000A8 _TEXT	
-  restart  . . . . . . . . . . .	L Near	 000000BE _TEXT	
-theEnd . . . . . . . . . . . . .	P Near	 000000F4 _TEXT	Length= 00000011 Public STDCALL
+  newline  . . . . . . . . . . .	L Near	 000000B9 _TEXT	
+  printNum . . . . . . . . . . .	L Near	 000000C8 _TEXT	
+  restart  . . . . . . . . . . .	L Near	 000000DE _TEXT	
+theEnd . . . . . . . . . . . . .	P Near	 00000114 _TEXT	Length= 00000011 Public STDCALL
 validate . . . . . . . . . . . .	P Near	 00000049 _TEXT	Length= 00000026 Public STDCALL
   invalid  . . . . . . . . . . .	L Near	 0000005B _TEXT	
 wsprintfA  . . . . . . . . . . .	P Near	 00000000 FLAT	Length= 00000000 External C
@@ -520,7 +547,7 @@ KEY_EVENT  . . . . . . . . . . .	Number	 00000001h
 KEY_MASKS  . . . . . . . . . . .	Number	 0000001Fh   
 LEFT_ALT_PRESSED . . . . . . . .	Number	 00000002h   
 LEFT_CTRL_PRESSED  . . . . . . .	Number	 00000008h   
-LOWLIM . . . . . . . . . . . . .	Number	 00000002h   
+LOWLIM . . . . . . . . . . . . .	Number	 00000004h   
 MB_ABORTRETRYIGNORE  . . . . . .	Number	 00000002h   
 MB_APPLMODAL . . . . . . . . . .	Number	 00000000h   
 MB_CANCELTRYCONTINUE . . . . . .	Number	 00000006h   
@@ -652,13 +679,13 @@ WriteConsole . . . . . . . . . .	Text   	 WriteConsoleA
 black  . . . . . . . . . . . . .	Number	 00000000h   
 blue . . . . . . . . . . . . . .	Number	 00000001h   
 brown  . . . . . . . . . . . . .	Number	 00000006h   
-bye  . . . . . . . . . . . . . .	Byte	 000000DD _DATA	
+bye  . . . . . . . . . . . . . .	Byte	 000000FE _DATA	
 cyan . . . . . . . . . . . . . .	Number	 00000003h   
 data1  . . . . . . . . . . . . .	Byte	 00000026 _DATA	
-dataEr . . . . . . . . . . . . .	Byte	 00000088 _DATA	
-debug1 . . . . . . . . . . . . .	Byte	 0000006B _DATA	
+dataEr . . . . . . . . . . . . .	Byte	 000000A5 _DATA	
+debug1 . . . . . . . . . . . . .	Byte	 00000088 _DATA	
 exit . . . . . . . . . . . . . .	Text   	 INVOKE ExitProcess,0
-flag . . . . . . . . . . . . . .	DWord	 000000A8 _DATA	
+flag . . . . . . . . . . . . . .	DWord	 000000C9 _DATA	
 gray . . . . . . . . . . . . . .	Number	 00000008h   
 green  . . . . . . . . . . . . .	Number	 00000002h   
 intro1 . . . . . . . . . . . . .	Byte	 00000000 _DATA	
@@ -668,14 +695,15 @@ lightGray  . . . . . . . . . . .	Number	 00000007h
 lightGreen . . . . . . . . . . .	Number	 0000000Ah   
 lightMagenta . . . . . . . . . .	Number	 0000000Dh   
 lightRed . . . . . . . . . . . .	Number	 0000000Ch   
-lpctr  . . . . . . . . . . . . .	DWord	 000000A0 _DATA	
+lnctr  . . . . . . . . . . . . .	DWord	 000000BD _DATA	
+lpctr  . . . . . . . . . . . . .	DWord	 000000C1 _DATA	
 magenta  . . . . . . . . . . . .	Number	 00000005h   
-prAgain  . . . . . . . . . . . .	Byte	 000000AF _DATA	
+prAgain  . . . . . . . . . . . .	Byte	 000000D0 _DATA	
 red  . . . . . . . . . . . . . .	Number	 00000004h   
-space  . . . . . . . . . . . . .	Byte	 000000AC _DATA	
-toCheck  . . . . . . . . . . . .	DWord	 000000A4 _DATA	
-usAgain  . . . . . . . . . . . .	DWord	 000000D9 _DATA	
-usLim  . . . . . . . . . . . . .	DWord	 00000067 _DATA	
+space  . . . . . . . . . . . . .	Byte	 000000CD _DATA	
+toCheck  . . . . . . . . . . . .	DWord	 000000C5 _DATA	
+usAgain  . . . . . . . . . . . .	DWord	 000000FA _DATA	
+usLim  . . . . . . . . . . . . .	DWord	 00000084 _DATA	
 white  . . . . . . . . . . . . .	Number	 0000000Fh   
 wsprintf . . . . . . . . . . . .	Text   	 wsprintfA
 yellow . . . . . . . . . . . . .	Number	 0000000Eh   
