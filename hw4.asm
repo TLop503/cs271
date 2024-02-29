@@ -24,7 +24,7 @@ LOWLIM		EQU		10
 	usNum		DWORD	?
 	prErr1		BYTE	"Invalid Input, please try again.",0
 	prData2		BYTE	"Enter Lower bound (lo): ",0
-	usLo		DWROD	?
+	usLo		DWORD	?
 	prData3		BYTE	"Enter Upper bound (hi): ",0
 	usHi		DWORD	?
 
@@ -39,6 +39,11 @@ LOWLIM		EQU		10
 
 main		PROC
 	CALL	intr
+	
+	; PBR
+	PUSH	OFFSET usHi
+	PUSH	OFFSET usLo
+	PUSH	OFFSET usNum
 	CALL	getUsData
 
 main		ENDP
@@ -55,11 +60,48 @@ intr		PROC
 intr		ENDP
 
 getUsData	PROC
-
+	; stack frame
+	PUSH	ebp
+	MOV		ebp, esp
 
 	;	printing out the prompt
 	MOV		edx, OFFSET PrData1
 	CALL	WRITESTRING
 	CALL	READINT
+	PUSH	eax	; pass to validate by reference (could be value but that is hard)
+	CALL	validate
+	; once good, get next data
+	MOV		eax, [ebp + 8]
+	CALL	WRITEDEC
+
+getUsData	ENDP
+
+validate	PROC
+	; stack frame
+	; stack frame
+	PUSH	ebp
+	MOV		ebp, esp
+
+	MOV		eax, [ebp + 8]
+	
+	; for debugging, print out what we are checking
+	;CALL	WRITEINT
+	;CALL	CRLF
+
+	CMP		eax, LOWLIM
+	JL		invalid
+	CMP		eax, UPPLIM
+	JG		invalid
+	; if all good return
+	POP		ebp
+	RET
+	invalid:
+		MOV     edx, OFFSET prErr1
+        CALL    WRITESTRING
+        CALL    CRLF
+		CALL	getUsData
+validate	ENDP
 
 
+
+END	main
