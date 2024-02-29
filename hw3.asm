@@ -31,7 +31,7 @@ LOWLIM     EQU     1    ; b/c 1 breaks
     lpctr   DWORD   ?
     toCheck DWORD   ?
     flag    DWORD   ?
-    space   BYTE    "  ",0
+    space   BYTE    "   ",0
 
     prAgain BYTE    "Would you like to go again? (1 = y/0 = n)",0
     usAgain DWORD   ?
