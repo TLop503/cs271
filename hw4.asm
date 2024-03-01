@@ -12,6 +12,7 @@ LOWLIM		EQU		10
 ZERO		EQU		1
 THOUS		EQU		999
 MAX_SIZE	EQU		100
+FOUR		EQU		4
 
 
 .data
@@ -36,6 +37,8 @@ MAX_SIZE	EQU		100
 	prArr1		BYTE	"The unsorted random numbers: ",0
 	prArr2		BYTE	"The sorted random numbers:",0
 
+	flag		DWORD	0
+
 	prMed		BYTE	"The median value: ",0
 
 	prAgain		BYTE	"Would you like to go again? (y/n)",0
@@ -56,6 +59,15 @@ main PROC
 	push	usNum
 	call	fillArray
 
+	Push	usNum
+	Push	OFFSET	array
+	Push	OFFSET	prArr1
+	CALL	printList
+
+	Push	flag
+	Push	usNum
+	Push	OFFSET	array
+	CALL	bubbleSort
 	exit
 main ENDP
 
@@ -97,7 +109,7 @@ getData	PROC
 
 	getLo:
 		mov		ebx, [ebp+12]
-		mov		edx, OFFSET	prData1
+		mov		edx, OFFSET	prData2
 		call	WRITESTRING
 		call	READINT
 		mov		[ebx], eax	;store input in usNum?
@@ -119,7 +131,7 @@ getData	PROC
 	getHi:
 		mov		ebx, [ebp+8] ; hi, inputted
 		mov		ecx, [ebp+12] ;lo
-		mov		edx, OFFSET	prData1
+		mov		edx, OFFSET	prData3
 		call	WRITESTRING
 		call	READINT
 		mov		[ebx], eax	;store input in usNum?
@@ -158,19 +170,101 @@ fillArray	PROC
 			inc		eax		; b/c exclusive
 			call	RANDOMRANGE	;[0, eax]
 			add		eax, [ebp+20]
-			; code above this line works and indees are correct
+			; code above this line works and indexes are correct
 
 			; populate array
 			mov		[edi], eax
-			CALL	WRITEINT
-			CALL	CRLF
+			;CALL	WRITEINT
+			;CALL	CRLF
 			add		edi, 4
 
 			loop again
 
 			pop ebp
 			ret
-
 fillArray	ENDP
+
+printList	PROC
+		PUSH	ebp
+		MOV		ebp, esp	;frame
+		
+		mov		edx, [ebp+8]	;title
+		CALL	WRITESTRING
+
+		mov		edx, [ebp+12]	;total items
+		mov		esi, [ebp+16]	;the array
+		mov		ebx, 1
+
+		again:	;the loop
+			mov		eax, 4
+			;mul		ebx
+			sub		edi, eax
+			mov		eax, [edi]
+			CALL	WRITEINT
+			cmp		ebx, [ebp+16]
+			je		ending
+			inc		ebx
+			jmp		again
+
+		ending:
+			pop		ebp
+			ret
+printList	ENDP		
+
+bubbleSort	PROC
+
+	PUSH	ebp
+	MOV		ebp, esp
+
+	; flag is stored at +16
+	; num is stored at +12
+	; array is stored at +8
+
+	mov		ecx, [ebp + 12]	; works
+
+	outer:
+		mov		eax, 0
+		mov		[ebp + 16], eax		;should work
+		
+		push	ecx		; save for loop. outer i is now stored in +4
+		dec		ecx		; start inner loop from one less
+		inner:
+			; if statement goes here
+			; i = [ebp - 4]
+			; j = ecx
+			mov		eax,	[ebp - 4]
+			mov		edx, FOUR
+			mul		edx
+			mov		ebx, eax		; i is in ebx
+
+			mov		eax, ecx
+			mov		edx, FOUR
+			mul		edx			; j is in eax
+
+			swap:
+				;stuff goes here
+				
+			loop inner
+		;jmp else
+
+		;notswapped:
+			; break out of outer
+		
+		;else:
+		;	pop		ecx
+		;	loop	outer
+			
+
+		
+
+			
+
+
+	pop		ebp
+	ret
+	
+bubbleSort	ENDP
+			
+
 			
 END main
