@@ -11,7 +11,7 @@ UPPLIM		EQU		200
 LOWLIM		EQU		10
 ZERO		EQU		1
 THOUS		EQU		999
-MAX_SIZE	EQU		200
+MAX_SIZE	EQU		201	; needs to be + 1 to avoid memory addresses getting tangled in
 FOUR		EQU		4
 
 
@@ -311,7 +311,7 @@ sorting		PROC
 
 	mov		esi, [ebp+8]	; put array in esi
 
-	dec		ecx		; start from 1 in from end
+	;inc		ecx		; start from 1 in from end
 
 	outer:
 		push	ecx		;save for later
