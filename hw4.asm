@@ -11,7 +11,7 @@ UPPLIM		EQU		200
 LOWLIM		EQU		10
 ZERO		EQU		1
 THOUS		EQU		999
-MAX_SIZE	EQU		100
+MAX_SIZE	EQU		200
 FOUR		EQU		4
 
 
@@ -164,7 +164,7 @@ getData	PROC
 
 	ending:
 		pop		ebp
-		ret
+		ret		12
 getData		ENDP
 
 fillArray	PROC
@@ -194,7 +194,7 @@ fillArray	PROC
 			loop again
 
 			pop ebp
-			ret
+			ret	16
 fillArray	ENDP
 
 printList	PROC
@@ -232,7 +232,7 @@ printList	PROC
 
 		ending:
 			pop		ebp
-			ret 
+			ret		12
 printList	ENDP		
 
 ; this is defunct
@@ -335,7 +335,7 @@ sorting		PROC
 				loop	outer
 
 	pop		ebp
-	ret
+	ret		12
 sorting endp
 
 median	proc
