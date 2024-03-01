@@ -74,6 +74,7 @@ getUsData	PROC
 	MOV		eax, [ebp + 8]
 	CALL	WRITEDEC
 
+	RET
 getUsData	ENDP
 
 validate	PROC
