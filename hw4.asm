@@ -63,11 +63,19 @@ main PROC
 	Push	OFFSET	array
 	Push	OFFSET	prArr1
 	CALL	printList
+	CALL	CRLF
 
 	Push	flag
 	Push	usNum
 	Push	OFFSET	array
-	CALL	bubbleSort
+	;CALL	bubbleSort
+	CALL	sorting
+	
+	Push	usNum
+	Push	OFFSET	array
+	Push	OFFSET	prArr2
+	CALL	printList
+
 	exit
 main ENDP
 
@@ -215,10 +223,14 @@ bubbleSort	PROC
 
 	PUSH	ebp
 	MOV		ebp, esp
+	
+	mov		edi, [ebp+8]
+
 
 	; flag is stored at +16
 	; num is stored at +12
 	; array is stored at +8
+
 
 	mov		ecx, [ebp + 12]	; works
 
@@ -237,9 +249,14 @@ bubbleSort	PROC
 			mul		edx
 			mov		ebx, eax		; i is in ebx
 
+
 			mov		eax, ecx
 			mov		edx, FOUR
 			mul		edx			; j is in eax
+
+			mov		eax, [edi+eax]
+			mov		ebx, [edi+ebx]
+			cmp		eax, ebx
 
 			swap:
 				;stuff goes here
@@ -265,6 +282,43 @@ bubbleSort	PROC
 	
 bubbleSort	ENDP
 			
+sorting		PROC
+	; flag is stored at +16
+	; num is stored at +12
+	; array is stored at +8
+	push	ebp
+	mov		ebp, esp
 
-			
+	mov		eax, [ebp+12]
+	mov		ecx, eax		; put user num in loop counter for outer loop
+
+	mov		esi, [ebp+8]	; put array in esi
+
+	dec		ecx		; start from 1 in from end
+
+	outer:
+		push	ecx		;save for later
+		mov		ecx, [ebp+12]	;get user num again
+		mov		esi, [ebp+8]	; load arr again from start
+
+		inner:
+			mov		eax, [esi]		;arr to esi
+			cmp		[esi+4], eax	;check against next index
+			jl		contd	; don''t swap
+			; swap goes here
+			mov		eax, [esi]
+			mov		ebx, [esi+4]
+			mov		[esi], ebx
+			mov		[esi+4], eax
+
+			contd:
+				add		esi, 4
+				loop	inner
+				pop		ecx		; restore outer loop
+				loop	outer
+
+	pop		ebp
+	ret
+sorting endp
+
 END main
