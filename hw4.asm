@@ -9,6 +9,8 @@ INCLUDE Irvine32.inc
 
 UPPLIM		EQU		200
 LOWLIM		EQU		10
+ZERO		EQU		1
+THOUS		EQU		999
 
 
 .data
@@ -21,12 +23,12 @@ LOWLIM		EQU		10
 	prIntro2	BYTE	"This generates N numbers in range [lo, hi], and displays, sorts, and displays again. Then, median value is calculated and displahyed.",0
 
 	prData1		BYTE	"How many numbers should be generated? [10, 200]: ",0
-	usNum		DWORD	?
+	usNum		DWORD	69
 	prErr1		BYTE	"Invalid Input, please try again.",0
 	prData2		BYTE	"Enter Lower bound (lo): ",0
-	usLo		DWORD	?
+	usLo		DWORD	420
 	prData3		BYTE	"Enter Upper bound (hi): ",0
-	usHi		DWORD	?
+	usHi		DWORD	7331
 
 	prArr1		BYTE	"The unsorted random numbers: ",0
 	prArr2		BYTE	"The sorted random numbers:",0
@@ -37,72 +39,98 @@ LOWLIM		EQU		10
 
 .code
 
-main		PROC
-	CALL	intr
-	
-	; PBR
-	PUSH	OFFSET usHi
-	PUSH	OFFSET usLo
-	PUSH	OFFSET usNum
-	CALL	getUsData
+main PROC
+	call intro
 
-main		ENDP
+	push	OFFSET usNum
+	push	OFFSET usLo
+	Push	OFFSET usHi
+	call	getData
 
-; Prints out the instructions for the program. Touches EDX. No significant pre/post conditions
-intr		PROC
-	MOV		edx, OFFSET prIntro1
-	CALL	WRITESTRING
-	CALL	CRLF
-	MOV		edx, OFFSET	prIntro2
-	CALL	WRITESTRING
-	CALL	CRLF
-	RET
-intr		ENDP
+	exit
+main ENDP
 
-getUsData	PROC
-	; stack frame
-	PUSH	ebp
-	MOV		ebp, esp
+; print intro
+intro PROC
+	mov		edx, OFFSET	prIntro1
+	call	WRITESTRING
+	call	CRLF
+	mov		edx, OFFSET prIntro2
+	call	WRITESTRING
+	call	CRLF
+	call	CRLF
+	ret
+intro ENDP
 
-	;	printing out the prompt
-	MOV		edx, OFFSET PrData1
-	CALL	WRITESTRING
-	CALL	READINT
-	PUSH	eax	; pass to validate by reference (could be value but that is hard)
-	CALL	validate
-	; once good, get next data
-	MOV		eax, [ebp + 8]
-	CALL	WRITEDEC
+getData	PROC
+		PUSH	ebp
+		MOV		ebp, esp	;frame
 
-	RET
-getUsData	ENDP
+	getNum:
+		mov		ebx, [ebp+16]
+		mov		edx, OFFSET	prData1
+		call	WRITESTRING
+		call	READINT
+		mov		[ebx], eax	;store input in usNum?
+		; shitty validation to be improved if I have time
+		cmp		eax, LOWLIM
+		jl		invalidNum
+		cmp		eax, UPPLIM
+		jg		invalidNum
 
-validate	PROC
-	; stack frame
-	; stack frame
-	PUSH	ebp
-	MOV		ebp, esp
+		jmp		getLo
 
-	MOV		eax, [ebp + 8]
-	
-	; for debugging, print out what we are checking
-	;CALL	WRITEINT
-	;CALL	CRLF
+	invalidNum:
+		mov		edx, OFFSET prErr1
+		CALL	WRITESTRING
+		CALL	CRLF
+		jmp		getNum
 
-	CMP		eax, LOWLIM
-	JL		invalid
-	CMP		eax, UPPLIM
-	JG		invalid
-	; if all good return
-	POP		ebp
-	RET
-	invalid:
-		MOV     edx, OFFSET prErr1
-        CALL    WRITESTRING
-        CALL    CRLF
-		CALL	getUsData
-validate	ENDP
+	getLo:
+		mov		ebx, [ebp+12]
+		mov		edx, OFFSET	prData1
+		call	WRITESTRING
+		call	READINT
+		mov		[ebx], eax	;store input in usNum?
+		; shitty validation to be improved if I have time
+		
+		cmp		eax, ZERO
+		jl		invalidLo
+		cmp		eax, THOUS
+		jg		invalidLo
 
+		jmp		getHi
 
+	invalidLo:
+		mov		edx, OFFSET prErr1
+		CALL	WRITESTRING
+		CALL	CRLF
+		jmp		getLo
 
-END	main
+	getHi:
+		mov		ebx, [ebp+8] ; hi, inputted
+		mov		ecx, [ebp+12] ;lo
+		mov		edx, OFFSET	prData1
+		call	WRITESTRING
+		call	READINT
+		mov		[ebx], eax	;store input in usNum?
+		; shitty validation to be improved if I have time
+		cmp		eax,[ecx]
+		jl		invalidHi
+		cmp		eax, THOUS
+		jg		invalidHi
+
+		jmp		ending
+
+	invalidHi:
+		mov		edx, OFFSET prErr1
+		CALL	WRITESTRING
+		CALL	CRLF
+		jmp		getHi
+
+	ending:
+		pop		ebp
+		ret
+getData		ENDP
+
+END main
