@@ -36,6 +36,8 @@ FOUR		EQU		4
 
 	prArr1		BYTE	"The unsorted random numbers: ",0
 	prArr2		BYTE	"The sorted random numbers:",0
+	space		BYTE	"   ",0
+	pointfive	BYTE	".5",0
 
 	flag		DWORD	0
 
@@ -76,6 +78,9 @@ main PROC
 	Push	OFFSET	prArr2
 	CALL	printList
 
+	push	usNum
+	push	OFFSET array
+	call	median
 	exit
 main ENDP
 
@@ -198,27 +203,39 @@ printList	PROC
 		
 		mov		edx, [ebp+8]	;title
 		CALL	WRITESTRING
+		CALL	CRLF
+		; above works
 
-		mov		edx, [ebp+12]	;total items
-		mov		esi, [ebp+16]	;the array
-		mov		ebx, 1
+		mov		ecx, [ebp+16]	;total items
+		mov		esi, [ebp+12]	;the array
+
+		mov		ebx, 0	;line counter
+
 
 		again:	;the loop
-			mov		eax, 4
-			;mul		ebx
-			sub		edi, eax
-			mov		eax, [edi]
-			CALL	WRITEINT
-			cmp		ebx, [ebp+16]
-			je		ending
 			inc		ebx
-			jmp		again
+			cmp		ebx, 11
+			je		newline
+			jmp		print
+
+			newline:
+				call	CRLF
+				mov		ebx, 1
+
+			print:
+				mov		eax, [esi]
+				call	writedec
+				mov		edx, OFFSET space
+				call	writestring
+				add		esi, 4
+				loop	again
 
 		ending:
 			pop		ebp
-			ret
+			ret 
 printList	ENDP		
 
+; this is defunct
 bubbleSort	PROC
 
 	PUSH	ebp
@@ -320,5 +337,69 @@ sorting		PROC
 	pop		ebp
 	ret
 sorting endp
+
+median	proc
+	push	ebp
+	mov		ebp, esp
+
+	; array is 8
+	; size is 12
+
+	mov		eax, [ebp+12]	;l size to eax
+	mov		esi, [ebp+8]	; put array in esi
+
+	mov		edx, 0
+
+	mov		ebx, 2
+	div		ebx	;eax / 2
+	cmp		edx, 1	;remainder
+	je		oddd
+	jmp		evenn
+
+	oddd:	
+		; target is in eax
+		mov		ebx, four
+		mul		ebx
+		call	crlf
+		mov		eax,  [esi + eax]
+		call	writedec
+		jmp		outside
+	evenn:
+		; target is in eax
+		dec		eax		; step into middle
+		mov		ebx, four
+		mul		ebx
+		mov		ebx, eax
+		call	crlf
+		mov		eax,  [esi + ebx]
+		add		ebx, four
+		add		eax, [esi + ebx]	;get next as well
+		mov		ebx, 2
+		div		ebx	; mean of 2 closest to median in eax, but may need a .5
+		cmp		edx, 1	;remainder
+		je		addfive
+		jmp		print
+
+		addfive:
+			call	crlf
+			call	writedec
+			mov		edx, OFFSET	pointfive
+			call	writestring
+			jmp		outside
+
+		print:
+			call	crlf
+			call	writedec
+			jmp		outside
+
+	outside:
+		pop		ebp
+		ret
+
+		
+		
+	
+	ret
+median	endp
 
 END main
