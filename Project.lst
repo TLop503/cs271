@@ -1,4 +1,4 @@
-Microsoft (R) Macro Assembler Version 14.35.32216.1	    02/29/24 17:54:29
+Microsoft (R) Macro Assembler Version 14.35.32216.1	    02/29/24 19:01:16
 Assignment4 (hw4.asm					     Page 1 - 1
 
 
@@ -32,6 +32,7 @@ Microsoft (R) Macro Assembler Version 14.35.32216.1	    02/29/24 17:54:29
  = 0000000A			LOWLIM		EQU		10
  = 00000001			ZERO		EQU		1
  = 000003E7			THOUS		EQU		999
+ = 00000064			MAX_SIZE	EQU		100
 
 
  00000000			.data
@@ -108,25 +109,29 @@ Microsoft (R) Macro Assembler Version 14.35.32216.1	    02/29/24 17:54:29
 	   69 29 3A 20 00
  0000013E 00001CA3			usHi		DWORD	7331
 
- 00000142 54 68 65 20 75		prArr1		BYTE	"The unsorted random numbers: ",0
+ 00000142  00000064 [			array		DWORD	MAX_SIZE	DUP(?)	;the array, intially full of garbage
+	    00000000
+	   ]
+
+ 000002D2 54 68 65 20 75		prArr1		BYTE	"The unsorted random numbers: ",0
 	   6E 73 6F 72 74
 	   65 64 20 72 61
 	   6E 64 6F 6D 20
 	   6E 75 6D 62 65
 	   72 73 3A 20 00
- 00000160 54 68 65 20 73		prArr2		BYTE	"The sorted random numbers:",0
+ 000002F0 54 68 65 20 73		prArr2		BYTE	"The sorted random numbers:",0
 	   6F 72 74 65 64
 	   20 72 61 6E 64
 	   6F 6D 20 6E 75
 	   6D 62 65 72 73
 	   3A 00
 
- 0000017B 54 68 65 20 6D		prMed		BYTE	"The median value: ",0
+ 0000030B 54 68 65 20 6D		prMed		BYTE	"The median value: ",0
 	   65 64 69 61 6E
 	   20 76 61 6C 75
 	   65 3A 20 00
 
- 0000018E 57 6F 75 6C 64		prAgain		BYTE	"Would you like to go again? (y/n)",0
+ 0000031E 57 6F 75 6C 64		prAgain		BYTE	"Would you like to go again? (y/n)",0
 	   20 79 6F 75 20
 	   6C 69 6B 65 20
 	   74 6F 20 67 6F
@@ -137,103 +142,140 @@ Microsoft (R) Macro Assembler Version 14.35.32216.1	    02/29/24 17:54:29
  00000000			.code
 
  00000000			main PROC
- 00000000  E8 0000001B			call intro
+ 00000000  E8 00000037			call intro
 
  00000005  68 000000E3 R		push	OFFSET usNum
  0000000A  68 00000121 R		push	OFFSET usLo
  0000000F  68 0000013E R		Push	OFFSET usHi
- 00000014  E8 0000002B			call	getData
+ 00000014  E8 00000047			call	getData
+					
+ 00000019  FF 35 00000121 R		Push	usLo
+ 0000001F  FF 35 0000013E R		Push	usHi
+ 00000025  68 00000142 R		push	OFFSET	array
+ 0000002A  FF 35 000000E3 R		push	usNum
+ 00000030  E8 000000CB			call	fillArray
 
 					exit
- 00000019  6A 00	   *	    push   +000000000h
- 0000001B  E8 00000000 E   *	    call   ExitProcess
- 00000020			main ENDP
+ 00000035  6A 00	   *	    push   +000000000h
+ 00000037  E8 00000000 E   *	    call   ExitProcess
+ 0000003C			main ENDP
 
 				; print intro
- 00000020			intro PROC
- 00000020  BA 00000000 R		mov		edx, OFFSET	prIntro1
- 00000025  E8 00000000 E		call	WRITESTRING
- 0000002A  E8 00000000 E		call	CRLF
- 0000002F  BA 0000002B R		mov		edx, OFFSET prIntro2
- 00000034  E8 00000000 E		call	WRITESTRING
- 00000039  E8 00000000 E		call	CRLF
- 0000003E  E8 00000000 E		call	CRLF
- 00000043  C3				ret
- 00000044			intro ENDP
+ 0000003C			intro PROC
+ 0000003C  BA 00000000 R		mov		edx, OFFSET	prIntro1
+ 00000041  E8 00000000 E		call	WRITESTRING
+ 00000046  E8 00000000 E		call	CRLF
+ 0000004B  BA 0000002B R		mov		edx, OFFSET prIntro2
+ 00000050  E8 00000000 E		call	WRITESTRING
+ 00000055  E8 00000000 E		call	CRLF
+ 0000005A  E8 00000000 E		call	CRLF
+ 0000005F  C3				ret
+ 00000060			intro ENDP
 
- 00000044			getData	PROC
- 00000044  55					PUSH	ebp
- 00000045  8B EC				MOV		ebp, esp	;frame
+ 00000060			getData	PROC
+ 00000060  55					PUSH	ebp
+ 00000061  8B EC				MOV		ebp, esp	;frame
 
- 00000047				getNum:
- 00000047  8B 5D 10				mov		ebx, [ebp+16]
- 0000004A  BA 000000B1 R			mov		edx, OFFSET	prData1
- 0000004F  E8 00000000 E			call	WRITESTRING
- 00000054  E8 00000000 E			call	READINT
- 00000059  89 03				mov		[ebx], eax	;store input in usNum?
+ 00000063				getNum:
+ 00000063  8B 5D 10				mov		ebx, [ebp+16]
+ 00000066  BA 000000B1 R			mov		edx, OFFSET	prData1
+ 0000006B  E8 00000000 E			call	WRITESTRING
+ 00000070  E8 00000000 E			call	READINT
+ 00000075  89 03				mov		[ebx], eax	;store input in usNum?
 						; shitty validation to be improved if I have time
- 0000005B  83 F8 0A				cmp		eax, LOWLIM
- 0000005E  7C 09				jl		invalidNum
- 00000060  3D 000000C8				cmp		eax, UPPLIM
- 00000065  7F 02				jg		invalidNum
+ 00000077  83 F8 0A				cmp		eax, LOWLIM
+ 0000007A  7C 09				jl		invalidNum
+ 0000007C  3D 000000C8				cmp		eax, UPPLIM
+ 00000081  7F 02				jg		invalidNum
 
- 00000067  EB 11				jmp		getLo
+ 00000083  EB 11				jmp		getLo
 
- 00000069				invalidNum:
- 00000069  BA 000000E7 R			mov		edx, OFFSET prErr1
- 0000006E  E8 00000000 E			CALL	WRITESTRING
- 00000073  E8 00000000 E			CALL	CRLF
- 00000078  EB CD				jmp		getNum
+ 00000085				invalidNum:
+ 00000085  BA 000000E7 R			mov		edx, OFFSET prErr1
+ 0000008A  E8 00000000 E			CALL	WRITESTRING
+ 0000008F  E8 00000000 E			CALL	CRLF
+ 00000094  EB CD				jmp		getNum
 
- 0000007A				getLo:
- 0000007A  8B 5D 0C				mov		ebx, [ebp+12]
- 0000007D  BA 000000B1 R			mov		edx, OFFSET	prData1
- 00000082  E8 00000000 E			call	WRITESTRING
- 00000087  E8 00000000 E			call	READINT
- 0000008C  89 03				mov		[ebx], eax	;store input in usNum?
+ 00000096				getLo:
+ 00000096  8B 5D 0C				mov		ebx, [ebp+12]
+ 00000099  BA 000000B1 R			mov		edx, OFFSET	prData1
+ 0000009E  E8 00000000 E			call	WRITESTRING
+ 000000A3  E8 00000000 E			call	READINT
+ 000000A8  89 03				mov		[ebx], eax	;store input in usNum?
 						; shitty validation to be improved if I have time
 						
- 0000008E  83 F8 01				cmp		eax, ZERO
- 00000091  7C 09				jl		invalidLo
- 00000093  3D 000003E7				cmp		eax, THOUS
- 00000098  7F 02				jg		invalidLo
+ 000000AA  83 F8 01				cmp		eax, ZERO
+ 000000AD  7C 09				jl		invalidLo
+ 000000AF  3D 000003E7				cmp		eax, THOUS
+ 000000B4  7F 02				jg		invalidLo
 
- 0000009A  EB 11				jmp		getHi
+ 000000B6  EB 11				jmp		getHi
 
- 0000009C				invalidLo:
- 0000009C  BA 000000E7 R			mov		edx, OFFSET prErr1
- 000000A1  E8 00000000 E			CALL	WRITESTRING
- 000000A6  E8 00000000 E			CALL	CRLF
- 000000AB  EB CD				jmp		getLo
+ 000000B8				invalidLo:
+ 000000B8  BA 000000E7 R			mov		edx, OFFSET prErr1
+ 000000BD  E8 00000000 E			CALL	WRITESTRING
+ 000000C2  E8 00000000 E			CALL	CRLF
+ 000000C7  EB CD				jmp		getLo
 
- 000000AD				getHi:
- 000000AD  8B 5D 08				mov		ebx, [ebp+8] ; hi, inputted
- 000000B0  8B 4D 0C				mov		ecx, [ebp+12] ;lo
- 000000B3  BA 000000B1 R			mov		edx, OFFSET	prData1
- 000000B8  E8 00000000 E			call	WRITESTRING
- 000000BD  E8 00000000 E			call	READINT
- 000000C2  89 03				mov		[ebx], eax	;store input in usNum?
+ 000000C9				getHi:
+ 000000C9  8B 5D 08				mov		ebx, [ebp+8] ; hi, inputted
+ 000000CC  8B 4D 0C				mov		ecx, [ebp+12] ;lo
+ 000000CF  BA 000000B1 R			mov		edx, OFFSET	prData1
+ 000000D4  E8 00000000 E			call	WRITESTRING
+ 000000D9  E8 00000000 E			call	READINT
+ 000000DE  89 03				mov		[ebx], eax	;store input in usNum?
 						; shitty validation to be improved if I have time
- 000000C4  3B 01				cmp		eax,[ecx]
- 000000C6  7C 09				jl		invalidHi
- 000000C8  3D 000003E7				cmp		eax, THOUS
- 000000CD  7F 02				jg		invalidHi
+ 000000E0  3B 01				cmp		eax,[ecx]
+ 000000E2  7C 09				jl		invalidHi
+ 000000E4  3D 000003E7				cmp		eax, THOUS
+ 000000E9  7F 02				jg		invalidHi
 
- 000000CF  EB 11				jmp		ending
+ 000000EB  EB 11				jmp		ending
 
- 000000D1				invalidHi:
- 000000D1  BA 000000E7 R			mov		edx, OFFSET prErr1
- 000000D6  E8 00000000 E			CALL	WRITESTRING
- 000000DB  E8 00000000 E			CALL	CRLF
- 000000E0  EB CB				jmp		getHi
+ 000000ED				invalidHi:
+ 000000ED  BA 000000E7 R			mov		edx, OFFSET prErr1
+ 000000F2  E8 00000000 E			CALL	WRITESTRING
+ 000000F7  E8 00000000 E			CALL	CRLF
+ 000000FC  EB CB				jmp		getHi
 
- 000000E2				ending:
- 000000E2  5D					pop		ebp
- 000000E3  C3					ret
- 000000E4			getData		ENDP
+ 000000FE				ending:
+ 000000FE  5D					pop		ebp
+ 000000FF  C3					ret
+ 00000100			getData		ENDP
 
+ 00000100			fillArray	PROC
+ 00000100  55					PUSH	ebp
+ 00000101  8B EC				MOV		ebp, esp	;frame
+
+						; get usNum for loop counter
+ 00000103  8B 4D 08				mov		ecx, [ebp+8];
+						
+						;get array into edi
+ 00000106  8B 7D 0C				mov		edi, [ebp+12]
+
+ 00000109					again:	;the loop
+ 00000109  8B 45 10					mov		eax, [ebp+16]	;get upper limit
+ 0000010C  2B 45 14					sub		eax, [ebp+20]	;sub low
+ 0000010F  40						inc		eax		; b/c exclusive
+ 00000110  E8 00000000 E				call	RANDOMRANGE	;[0, eax]
+ 00000115  03 45 14					add		eax, [ebp+20]
+							; code above this line works and indees are correct
+
+							; populate array
+ 00000118  89 07					mov		[edi], eax
+ 0000011A  E8 00000000 E				CALL	WRITEINT
+ 0000011F  E8 00000000 E				CALL	CRLF
+ 00000124  83 C7 04					add		edi, 4
+
+ 00000127  E2 E0					loop again
+
+ 00000129  5D						pop ebp
+ 0000012A  C3						ret
+
+ 0000012B			fillArray	ENDP
+							
 				END main
-Microsoft (R) Macro Assembler Version 14.35.32216.1	    02/29/24 17:54:29
+Microsoft (R) Macro Assembler Version 14.35.32216.1	    02/29/24 19:01:16
 Assignment4 (hw4.asm					     Symbols 2 - 1
 
 
@@ -327,8 +369,8 @@ Segments and Groups:
 
 FLAT . . . . . . . . . . . . . .	GROUP
 STACK  . . . . . . . . . . . . .	32 Bit	 00001000 Para	  Stack	  'STACK'	 
-_DATA  . . . . . . . . . . . . .	32 Bit	 000001B0 Para	  Public  'DATA'	
-_TEXT  . . . . . . . . . . . . .	32 Bit	 000000E4 Para	  Public  'CODE'	
+_DATA  . . . . . . . . . . . . .	32 Bit	 00000340 Para	  Public  'DATA'	
+_TEXT  . . . . . . . . . . . . .	32 Bit	 0000012B Para	  Public  'CODE'	
 
 
 Procedures, parameters, and locals:
@@ -435,16 +477,18 @@ WriteStackFrame  . . . . . . . .	P Near	 00000000 FLAT	Length= 00000000 External
 WriteString  . . . . . . . . . .	P Near	 00000000 FLAT	Length= 00000000 External STDCALL
 WriteToFile  . . . . . . . . . .	P Near	 00000000 FLAT	Length= 00000000 External STDCALL
 WriteWindowsMsg  . . . . . . . .	P Near	 00000000 FLAT	Length= 00000000 External STDCALL
-getData  . . . . . . . . . . . .	P Near	 00000044 _TEXT	Length= 000000A0 Public STDCALL
-  getNum . . . . . . . . . . . .	L Near	 00000047 _TEXT	
-  invalidNum . . . . . . . . . .	L Near	 00000069 _TEXT	
-  getLo  . . . . . . . . . . . .	L Near	 0000007A _TEXT	
-  invalidLo  . . . . . . . . . .	L Near	 0000009C _TEXT	
-  getHi  . . . . . . . . . . . .	L Near	 000000AD _TEXT	
-  invalidHi  . . . . . . . . . .	L Near	 000000D1 _TEXT	
-  ending . . . . . . . . . . . .	L Near	 000000E2 _TEXT	
-intro  . . . . . . . . . . . . .	P Near	 00000020 _TEXT	Length= 00000024 Public STDCALL
-main . . . . . . . . . . . . . .	P Near	 00000000 _TEXT	Length= 00000020 Public STDCALL
+fillArray  . . . . . . . . . . .	P Near	 00000100 _TEXT	Length= 0000002B Public STDCALL
+  again  . . . . . . . . . . . .	L Near	 00000109 _TEXT	
+getData  . . . . . . . . . . . .	P Near	 00000060 _TEXT	Length= 000000A0 Public STDCALL
+  getNum . . . . . . . . . . . .	L Near	 00000063 _TEXT	
+  invalidNum . . . . . . . . . .	L Near	 00000085 _TEXT	
+  getLo  . . . . . . . . . . . .	L Near	 00000096 _TEXT	
+  invalidLo  . . . . . . . . . .	L Near	 000000B8 _TEXT	
+  getHi  . . . . . . . . . . . .	L Near	 000000C9 _TEXT	
+  invalidHi  . . . . . . . . . .	L Near	 000000ED _TEXT	
+  ending . . . . . . . . . . . .	L Near	 000000FE _TEXT	
+intro  . . . . . . . . . . . . .	P Near	 0000003C _TEXT	Length= 00000024 Public STDCALL
+main . . . . . . . . . . . . . .	P Near	 00000000 _TEXT	Length= 0000003C Public STDCALL
 printf . . . . . . . . . . . . .	P Near	 00000000 FLAT	Length= 00000000 External C
 scanf  . . . . . . . . . . . . .	P Near	 00000000 FLAT	Length= 00000000 External C
 wsprintfA  . . . . . . . . . . .	P Near	 00000000 FLAT	Length= 00000000 External C
@@ -537,6 +581,7 @@ KEY_MASKS  . . . . . . . . . . .	Number	 0000001Fh
 LEFT_ALT_PRESSED . . . . . . . .	Number	 00000002h   
 LEFT_CTRL_PRESSED  . . . . . . .	Number	 00000008h   
 LOWLIM . . . . . . . . . . . . .	Number	 0000000Ah   
+MAX_SIZE . . . . . . . . . . . .	Number	 00000064h   
 MB_ABORTRETRYIGNORE  . . . . . .	Number	 00000002h   
 MB_APPLMODAL . . . . . . . . . .	Number	 00000000h   
 MB_CANCELTRYCONTINUE . . . . . .	Number	 00000006h   
@@ -667,6 +712,7 @@ WINDOW_BUFFER_SIZE_EVENT . . . .	Number	 00000004h
 WriteConsoleOutputCharacter  . .	Text   	 WriteConsoleOutputCharacterA
 WriteConsole . . . . . . . . . .	Text   	 WriteConsoleA
 ZERO . . . . . . . . . . . . . .	Number	 00000001h   
+array  . . . . . . . . . . . . .	DWord	 00000142 _DATA	
 black  . . . . . . . . . . . . .	Number	 00000000h   
 blue . . . . . . . . . . . . . .	Number	 00000001h   
 brown  . . . . . . . . . . . . .	Number	 00000006h   
@@ -681,16 +727,16 @@ lightGreen . . . . . . . . . . .	Number	 0000000Ah
 lightMagenta . . . . . . . . . .	Number	 0000000Dh   
 lightRed . . . . . . . . . . . .	Number	 0000000Ch   
 magenta  . . . . . . . . . . . .	Number	 00000005h   
-prAgain  . . . . . . . . . . . .	Byte	 0000018E _DATA	
-prArr1 . . . . . . . . . . . . .	Byte	 00000142 _DATA	
-prArr2 . . . . . . . . . . . . .	Byte	 00000160 _DATA	
+prAgain  . . . . . . . . . . . .	Byte	 0000031E _DATA	
+prArr1 . . . . . . . . . . . . .	Byte	 000002D2 _DATA	
+prArr2 . . . . . . . . . . . . .	Byte	 000002F0 _DATA	
 prData1  . . . . . . . . . . . .	Byte	 000000B1 _DATA	
 prData2  . . . . . . . . . . . .	Byte	 00000108 _DATA	
 prData3  . . . . . . . . . . . .	Byte	 00000125 _DATA	
 prErr1 . . . . . . . . . . . . .	Byte	 000000E7 _DATA	
 prIntro1 . . . . . . . . . . . .	Byte	 00000000 _DATA	
 prIntro2 . . . . . . . . . . . .	Byte	 0000002B _DATA	
-prMed  . . . . . . . . . . . . .	Byte	 0000017B _DATA	
+prMed  . . . . . . . . . . . . .	Byte	 0000030B _DATA	
 red  . . . . . . . . . . . . . .	Number	 00000004h   
 usHi . . . . . . . . . . . . . .	DWord	 0000013E _DATA	
 usLo . . . . . . . . . . . . . .	DWord	 00000121 _DATA	

@@ -11,6 +11,7 @@ UPPLIM		EQU		200
 LOWLIM		EQU		10
 ZERO		EQU		1
 THOUS		EQU		999
+MAX_SIZE	EQU		100
 
 
 .data
@@ -30,6 +31,8 @@ THOUS		EQU		999
 	prData3		BYTE	"Enter Upper bound (hi): ",0
 	usHi		DWORD	7331
 
+	array		DWORD	MAX_SIZE	DUP(?)	;the array, intially full of garbage
+
 	prArr1		BYTE	"The unsorted random numbers: ",0
 	prArr2		BYTE	"The sorted random numbers:",0
 
@@ -46,6 +49,12 @@ main PROC
 	push	OFFSET usLo
 	Push	OFFSET usHi
 	call	getData
+	
+	Push	usLo
+	Push	usHi
+	push	OFFSET	array
+	push	usNum
+	call	fillArray
 
 	exit
 main ENDP
@@ -133,4 +142,35 @@ getData	PROC
 		ret
 getData		ENDP
 
+fillArray	PROC
+		PUSH	ebp
+		MOV		ebp, esp	;frame
+
+		; get usNum for loop counter
+		mov		ecx, [ebp+8];
+		
+		;get array into edi
+		mov		edi, [ebp+12]
+
+		again:	;the loop
+			mov		eax, [ebp+16]	;get upper limit
+			sub		eax, [ebp+20]	;sub low
+			inc		eax		; b/c exclusive
+			call	RANDOMRANGE	;[0, eax]
+			add		eax, [ebp+20]
+			; code above this line works and indees are correct
+
+			; populate array
+			mov		[edi], eax
+			CALL	WRITEINT
+			CALL	CRLF
+			add		edi, 4
+
+			loop again
+
+			pop ebp
+			ret
+
+fillArray	ENDP
+			
 END main
