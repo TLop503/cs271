@@ -1,4 +1,4 @@
-Microsoft (R) Macro Assembler Version 14.35.32216.1	    03/01/24 15:36:20
+Microsoft (R) Macro Assembler Version 14.35.32216.1	    03/01/24 16:00:45
 Assignment4 (hw4.asm					     Page 1 - 1
 
 
@@ -32,7 +32,7 @@ Microsoft (R) Macro Assembler Version 14.35.32216.1	    03/01/24 15:36:20
  = 0000000A			LOWLIM		EQU		10
  = 00000001			ZERO		EQU		1
  = 000003E7			THOUS		EQU		999
- = 000000C9			MAX_SIZE	EQU		201
+ = 000000C9			MAX_SIZE	EQU		201	; needs to be + 1 to avoid memory addresses getting tangled in
  = 00000004			FOUR		EQU		4
 
 
@@ -136,213 +136,234 @@ Microsoft (R) Macro Assembler Version 14.35.32216.1	    03/01/24 15:36:20
 	   20 76 61 6C 75
 	   65 3A 20 00
 
- 000004BD 57 6F 75 6C 64		prAgain		BYTE	"Would you like to go again? (y/n)",0
+ 000004BD 57 6F 75 6C 64		prAgain		BYTE	"Would you like to go again? (1/0)",0
 	   20 79 6F 75 20
 	   6C 69 6B 65 20
 	   74 6F 20 67 6F
 	   20 61 67 61 69
-	   6E 3F 20 28 79
-	   2F 6E 29 00
+	   6E 3F 20 28 31
+	   2F 30 29 00
+ 000004DF 43 6C 6F 73 69		bye	        BYTE    "Closing program. Goodbye",0
+	   6E 67 20 70 72
+	   6F 67 72 61 6D
+	   2E 20 47 6F 6F
+	   64 62 79 65 00
 
  00000000			.code
 
+				; main access point, where all other logic stems from
  00000000			main PROC
- 00000000  E8 0000008C			call intro
+ 00000000  E8 00000091			call intro
 
  00000005  68 000000E3 R		push	OFFSET usNum
  0000000A  68 00000121 R		push	OFFSET usLo
  0000000F  68 0000013E R		Push	OFFSET usHi
- 00000014  E8 0000009C			call	getData
+ 00000014  E8 000000A1			call	getData
 					
  00000019  FF 35 00000121 R		Push	usLo
  0000001F  FF 35 0000013E R		Push	usHi
  00000025  68 00000142 R		push	OFFSET	array
  0000002A  FF 35 000000E3 R		push	usNum
- 00000030  E8 00000122			call	fillArray
+ 00000030  E8 00000127			call	fillArray
 
  00000035  FF 35 000000E3 R		Push	usNum
  0000003B  68 00000142 R		Push	OFFSET	array
  00000040  68 00000466 R		Push	OFFSET	prArr1
- 00000045  E8 00000130			CALL	printList
+ 00000045  E8 00000135			CALL	printList
  0000004A  E8 00000000 E		CALL	CRLF
 
  0000004F  FF 35 000004A6 R		Push	flag
  00000055  FF 35 000000E3 R		Push	usNum
  0000005B  68 00000142 R		Push	OFFSET	array
-					;CALL	bubbleSort
- 00000060  E8 00000190			CALL	sorting
+					;CALL	bubbleSort	; this is defunct and only persists for historical purposes
+ 00000060  E8 00000195			CALL	sorting
 					
  00000065  FF 35 000000E3 R		Push	usNum
  0000006B  68 00000142 R		Push	OFFSET	array
  00000070  68 00000484 R		Push	OFFSET	prArr2
- 00000075  E8 00000100			CALL	printList
+ 00000075  E8 00000105			CALL	printList
 
  0000007A  FF 35 000000E3 R		push	usNum
  00000080  68 00000142 R		push	OFFSET array
- 00000085  E8 0000019A			call	median
+ 00000085  E8 0000019F			call	median
+
+ 0000008A  E8 00000219			call	goAgain
+
 					exit
- 0000008A  6A 00	   *	    push   +000000000h
- 0000008C  E8 00000000 E   *	    call   ExitProcess
- 00000091			main ENDP
+ 0000008F  6A 00	   *	    push   +000000000h
+ 00000091  E8 00000000 E   *	    call   ExitProcess
+ 00000096			main ENDP
 
-				; print intro
- 00000091			intro PROC
- 00000091  BA 00000000 R		mov		edx, OFFSET	prIntro1
- 00000096  E8 00000000 E		call	WRITESTRING
- 0000009B  E8 00000000 E		call	CRLF
- 000000A0  BA 0000002B R		mov		edx, OFFSET prIntro2
- 000000A5  E8 00000000 E		call	WRITESTRING
- 000000AA  E8 00000000 E		call	CRLF
+				; print intro, via edx. no pre/post conditions, no paramaters.
+ 00000096			intro PROC
+ 00000096  BA 00000000 R		mov		edx, OFFSET	prIntro1
+ 0000009B  E8 00000000 E		call	WRITESTRING
+ 000000A0  E8 00000000 E		call	CRLF
+ 000000A5  BA 0000002B R		mov		edx, OFFSET prIntro2
+ 000000AA  E8 00000000 E		call	WRITESTRING
  000000AF  E8 00000000 E		call	CRLF
- 000000B4  C3				ret
- 000000B5			intro ENDP
+ 000000B4  E8 00000000 E		call	CRLF
+ 000000B9  C3				ret
+ 000000BA			intro ENDP
 
- 000000B5			getData	PROC
- 000000B5  55					PUSH	ebp
- 000000B6  8B EC				MOV		ebp, esp	;frame
+				; prints out requests for, and then validates, input. takes usLo, usHi, and usNum.
+				; touches ebp, esp, ebx, edx, eax, [ebx], ecx.
+				; this could be further optimized to be called 3x, once for each inputted value, but for the sake of my 
+				; sanity is handled like this
+				; afterwards params will be populated
+ 000000BA			getData	PROC
+ 000000BA  55					PUSH	ebp
+ 000000BB  8B EC				MOV		ebp, esp	;frame
 
- 000000B8				getNum:
- 000000B8  8B 5D 10				mov		ebx, [ebp+16]
- 000000BB  BA 000000B1 R			mov		edx, OFFSET	prData1
- 000000C0  E8 00000000 E			call	WRITESTRING
- 000000C5  E8 00000000 E			call	READINT
- 000000CA  89 03				mov		[ebx], eax	;store input in usNum?
+ 000000BD				getNum:
+ 000000BD  8B 5D 10				mov		ebx, [ebp+16]
+ 000000C0  BA 000000B1 R			mov		edx, OFFSET	prData1
+ 000000C5  E8 00000000 E			call	WRITESTRING
+ 000000CA  E8 00000000 E			call	READINT
+ 000000CF  89 03				mov		[ebx], eax	;store input in usNum?
 						; shitty validation to be improved if I have time
- 000000CC  83 F8 0A				cmp		eax, LOWLIM
- 000000CF  7C 09				jl		invalidNum
- 000000D1  3D 000000C8				cmp		eax, UPPLIM
- 000000D6  7F 02				jg		invalidNum
+ 000000D1  83 F8 0A				cmp		eax, LOWLIM
+ 000000D4  7C 09				jl		invalidNum
+ 000000D6  3D 000000C8				cmp		eax, UPPLIM
+ 000000DB  7F 02				jg		invalidNum
 
- 000000D8  EB 11				jmp		getLo
+ 000000DD  EB 11				jmp		getLo
 
- 000000DA				invalidNum:
- 000000DA  BA 000000E7 R			mov		edx, OFFSET prErr1
- 000000DF  E8 00000000 E			CALL	WRITESTRING
- 000000E4  E8 00000000 E			CALL	CRLF
- 000000E9  EB CD				jmp		getNum
+ 000000DF				invalidNum:
+ 000000DF  BA 000000E7 R			mov		edx, OFFSET prErr1
+ 000000E4  E8 00000000 E			CALL	WRITESTRING
+ 000000E9  E8 00000000 E			CALL	CRLF
+ 000000EE  EB CD				jmp		getNum
 
- 000000EB				getLo:
- 000000EB  8B 5D 0C				mov		ebx, [ebp+12]
- 000000EE  BA 00000108 R			mov		edx, OFFSET	prData2
- 000000F3  E8 00000000 E			call	WRITESTRING
- 000000F8  E8 00000000 E			call	READINT
- 000000FD  89 03				mov		[ebx], eax	;store input in usNum?
+ 000000F0				getLo:
+ 000000F0  8B 5D 0C				mov		ebx, [ebp+12]
+ 000000F3  BA 00000108 R			mov		edx, OFFSET	prData2
+ 000000F8  E8 00000000 E			call	WRITESTRING
+ 000000FD  E8 00000000 E			call	READINT
+ 00000102  89 03				mov		[ebx], eax	;store input in usNum?
 						; shitty validation to be improved if I have time
 						
- 000000FF  83 F8 01				cmp		eax, ZERO
- 00000102  7C 09				jl		invalidLo
- 00000104  3D 000003E7				cmp		eax, THOUS
- 00000109  7F 02				jg		invalidLo
+ 00000104  83 F8 01				cmp		eax, ZERO
+ 00000107  7C 09				jl		invalidLo
+ 00000109  3D 000003E7				cmp		eax, THOUS
+ 0000010E  7F 02				jg		invalidLo
 
- 0000010B  EB 11				jmp		getHi
+ 00000110  EB 11				jmp		getHi
 
- 0000010D				invalidLo:
- 0000010D  BA 000000E7 R			mov		edx, OFFSET prErr1
- 00000112  E8 00000000 E			CALL	WRITESTRING
- 00000117  E8 00000000 E			CALL	CRLF
- 0000011C  EB CD				jmp		getLo
+ 00000112				invalidLo:
+ 00000112  BA 000000E7 R			mov		edx, OFFSET prErr1
+ 00000117  E8 00000000 E			CALL	WRITESTRING
+ 0000011C  E8 00000000 E			CALL	CRLF
+ 00000121  EB CD				jmp		getLo
 
- 0000011E				getHi:
- 0000011E  8B 5D 08				mov		ebx, [ebp+8] ; hi, inputted
- 00000121  8B 4D 0C				mov		ecx, [ebp+12] ;lo
- 00000124  BA 00000125 R			mov		edx, OFFSET	prData3
- 00000129  E8 00000000 E			call	WRITESTRING
- 0000012E  E8 00000000 E			call	READINT
- 00000133  89 03				mov		[ebx], eax	;store input in usNum?
+ 00000123				getHi:
+ 00000123  8B 5D 08				mov		ebx, [ebp+8] ; hi, inputted
+ 00000126  8B 4D 0C				mov		ecx, [ebp+12] ;lo
+ 00000129  BA 00000125 R			mov		edx, OFFSET	prData3
+ 0000012E  E8 00000000 E			call	WRITESTRING
+ 00000133  E8 00000000 E			call	READINT
+ 00000138  89 03				mov		[ebx], eax	;store input in usNum?
 						; shitty validation to be improved if I have time
- 00000135  3B 01				cmp		eax,[ecx]
- 00000137  7C 09				jl		invalidHi
- 00000139  3D 000003E7				cmp		eax, THOUS
- 0000013E  7F 02				jg		invalidHi
+ 0000013A  3B 01				cmp		eax,[ecx]
+ 0000013C  7C 09				jl		invalidHi
+ 0000013E  3D 000003E7				cmp		eax, THOUS
+ 00000143  7F 02				jg		invalidHi
 
- 00000140  EB 11				jmp		ending
+ 00000145  EB 11				jmp		ending
 
- 00000142				invalidHi:
- 00000142  BA 000000E7 R			mov		edx, OFFSET prErr1
- 00000147  E8 00000000 E			CALL	WRITESTRING
- 0000014C  E8 00000000 E			CALL	CRLF
- 00000151  EB CB				jmp		getHi
+ 00000147				invalidHi:
+ 00000147  BA 000000E7 R			mov		edx, OFFSET prErr1
+ 0000014C  E8 00000000 E			CALL	WRITESTRING
+ 00000151  E8 00000000 E			CALL	CRLF
+ 00000156  EB CB				jmp		getHi
 
- 00000153				ending:
- 00000153  5D					pop		ebp
- 00000154  C2 000C				ret		12
- 00000157			getData		ENDP
+ 00000158				ending:
+ 00000158  5D					pop		ebp
+ 00000159  C2 000C				ret		12
+ 0000015C			getData		ENDP
 
- 00000157			fillArray	PROC
- 00000157  55					PUSH	ebp
- 00000158  8B EC				MOV		ebp, esp	;frame
+				; populates the array with usNum values between usLo and usHi. Those are also the paramaters (array is PBR).
+				; requires paramaters are correctly populated. Afterwards the array will contain random values to sort out.
+				; touches ebp, esp, ecx, edi, eax, [edi]. uses a looop to smooth the proccess.
+ 0000015C			fillArray	PROC
+ 0000015C  55					PUSH	ebp
+ 0000015D  8B EC				MOV		ebp, esp	;frame
 
 						; get usNum for loop counter
- 0000015A  8B 4D 08				mov		ecx, [ebp+8];
+ 0000015F  8B 4D 08				mov		ecx, [ebp+8];
 						
 						;get array into edi
- 0000015D  8B 7D 0C				mov		edi, [ebp+12]
+ 00000162  8B 7D 0C				mov		edi, [ebp+12]
 
- 00000160					again:	;the loop
- 00000160  8B 45 10					mov		eax, [ebp+16]	;get upper limit
- 00000163  2B 45 14					sub		eax, [ebp+20]	;sub low
- 00000166  40						inc		eax		; b/c exclusive
- 00000167  E8 00000000 E				call	RANDOMRANGE	;[0, eax]
- 0000016C  03 45 14					add		eax, [ebp+20]
+ 00000165					again:	;the loop
+ 00000165  8B 45 10					mov		eax, [ebp+16]	;get upper limit
+ 00000168  2B 45 14					sub		eax, [ebp+20]	;sub low
+ 0000016B  40						inc		eax		; b/c exclusive
+ 0000016C  E8 00000000 E				call	RANDOMRANGE	;[0, eax]
+ 00000171  03 45 14					add		eax, [ebp+20]
 							; code above this line works and indexes are correct
 
 							; populate array
- 0000016F  89 07					mov		[edi], eax
+ 00000174  89 07					mov		[edi], eax
 							;CALL	WRITEINT
 							;CALL	CRLF
- 00000171  83 C7 04					add		edi, 4
+ 00000176  83 C7 04					add		edi, 4
 
- 00000174  E2 EA					loop again
+ 00000179  E2 EA					loop again
 
- 00000176  5D						pop ebp
- 00000177  C2 0010					ret	16
- 0000017A			fillArray	ENDP
+ 0000017B  5D						pop ebp
+ 0000017C  C2 0010					ret	16
+ 0000017F			fillArray	ENDP
 
- 0000017A			printList	PROC
- 0000017A  55					PUSH	ebp
- 0000017B  8B EC				MOV		ebp, esp	;frame
+
+				; print out the title paramater and the the contents of the array paramater, 10 per line. 
+				; requires both params to be populated, but doesn''t actually mutuate anyhting.
+				; touches ebp, esp, ecx, esi, ebx, eax, edx
+ 0000017F			printList	PROC
+ 0000017F  55					PUSH	ebp
+ 00000180  8B EC				MOV		ebp, esp	;frame
 						
- 0000017D  8B 55 08				mov		edx, [ebp+8]	;title
- 00000180  E8 00000000 E			CALL	WRITESTRING
- 00000185  E8 00000000 E			CALL	CRLF
+ 00000182  8B 55 08				mov		edx, [ebp+8]	;title
+ 00000185  E8 00000000 E			CALL	WRITESTRING
+ 0000018A  E8 00000000 E			CALL	CRLF
 						; above works
 
- 0000018A  8B 4D 10				mov		ecx, [ebp+16]	;total items
- 0000018D  8B 75 0C				mov		esi, [ebp+12]	;the array
+ 0000018F  8B 4D 10				mov		ecx, [ebp+16]	;total items
+ 00000192  8B 75 0C				mov		esi, [ebp+12]	;the array
 
- 00000190  BB 00000000				mov		ebx, 0	;line counter
+ 00000195  BB 00000000				mov		ebx, 0	;line counter
 
 
- 00000195					again:	;the loop
- 00000195  43						inc		ebx
- 00000196  83 FB 0B					cmp		ebx, 11
- 00000199  74 02					je		newline
- 0000019B  EB 0A					jmp		print
+ 0000019A					again:	;the loop
+ 0000019A  43						inc		ebx
+ 0000019B  83 FB 0B					cmp		ebx, 11
+ 0000019E  74 02					je		newline
+ 000001A0  EB 0A					jmp		print
 
- 0000019D						newline:
- 0000019D  E8 00000000 E					call	CRLF
- 000001A2  BB 00000001						mov		ebx, 1
+ 000001A2						newline:
+ 000001A2  E8 00000000 E					call	CRLF
+ 000001A7  BB 00000001						mov		ebx, 1
 
- 000001A7						print:
- 000001A7  8B 06						mov		eax, [esi]
- 000001A9  E8 00000000 E					call	writedec
- 000001AE  BA 0000049F R					mov		edx, OFFSET space
- 000001B3  E8 00000000 E					call	writestring
- 000001B8  83 C6 04						add		esi, 4
- 000001BB  E2 D8						loop	again
+ 000001AC						print:
+ 000001AC  8B 06						mov		eax, [esi]
+ 000001AE  E8 00000000 E					call	writedec
+ 000001B3  BA 0000049F R					mov		edx, OFFSET space	; for spacing
+ 000001B8  E8 00000000 E					call	writestring
+ 000001BD  83 C6 04						add		esi, 4
+ 000001C0  E2 D8						loop	again
 
- 000001BD					ending:
- 000001BD  5D						pop		ebp
- 000001BE  C2 000C					ret		12
- 000001C1			printList	ENDP		
+ 000001C2					ending:
+ 000001C2  5D						pop		ebp
+ 000001C3  C2 000C					ret		12
+ 000001C6			printList	ENDP		
 
-				; this is defunct
- 000001C1			bubbleSort	PROC
+				; this is defunct, here be dragons
+ 000001C6			bubbleSort	PROC
 
- 000001C1  55				PUSH	ebp
- 000001C2  8B EC			MOV		ebp, esp
+ 000001C6  55				PUSH	ebp
+ 000001C7  8B EC			MOV		ebp, esp
 					
- 000001C4  8B 7D 08			mov		edi, [ebp+8]
+ 000001C9  8B 7D 08			mov		edi, [ebp+8]
 
 
 					; flag is stored at +16
@@ -350,36 +371,36 @@ Microsoft (R) Macro Assembler Version 14.35.32216.1	    03/01/24 15:36:20
 					; array is stored at +8
 
 
- 000001C7  8B 4D 0C			mov		ecx, [ebp + 12]	; works
+ 000001CC  8B 4D 0C			mov		ecx, [ebp + 12]	; works
 
- 000001CA				outer:
- 000001CA  B8 00000000				mov		eax, 0
- 000001CF  89 45 10				mov		[ebp + 16], eax		;should work
+ 000001CF				outer:
+ 000001CF  B8 00000000				mov		eax, 0
+ 000001D4  89 45 10				mov		[ebp + 16], eax		;should work
 						
- 000001D2  51					push	ecx		; save for loop. outer i is now stored in +4
- 000001D3  49					dec		ecx		; start inner loop from one less
- 000001D4					inner:
+ 000001D7  51					push	ecx		; save for loop. outer i is now stored in +4
+ 000001D8  49					dec		ecx		; start inner loop from one less
+ 000001D9					inner:
 							; if statement goes here
 							; i = [ebp - 4]
 							; j = ecx
- 000001D4  8B 45 FC					mov		eax,	[ebp - 4]
- 000001D7  BA 00000004					mov		edx, FOUR
- 000001DC  F7 E2					mul		edx
- 000001DE  8B D8					mov		ebx, eax		; i is in ebx
+ 000001D9  8B 45 FC					mov		eax,	[ebp - 4]
+ 000001DC  BA 00000004					mov		edx, FOUR
+ 000001E1  F7 E2					mul		edx
+ 000001E3  8B D8					mov		ebx, eax		; i is in ebx
 
 
- 000001E0  8B C1					mov		eax, ecx
- 000001E2  BA 00000004					mov		edx, FOUR
- 000001E7  F7 E2					mul		edx			; j is in eax
+ 000001E5  8B C1					mov		eax, ecx
+ 000001E7  BA 00000004					mov		edx, FOUR
+ 000001EC  F7 E2					mul		edx			; j is in eax
 
- 000001E9  8B 04 07					mov		eax, [edi+eax]
- 000001EC  8B 1C 1F					mov		ebx, [edi+ebx]
- 000001EF  3B C3					cmp		eax, ebx
+ 000001EE  8B 04 07					mov		eax, [edi+eax]
+ 000001F1  8B 1C 1F					mov		ebx, [edi+ebx]
+ 000001F4  3B C3					cmp		eax, ebx
 
- 000001F1						swap:
+ 000001F6						swap:
 								;stuff goes here
 								
- 000001F1  E2 E1					loop inner
+ 000001F6  E2 E1					loop inner
 						;jmp else
 
 						;notswapped:
@@ -395,116 +416,156 @@ Microsoft (R) Macro Assembler Version 14.35.32216.1	    03/01/24 15:36:20
 							
 
 
- 000001F3  5D				pop		ebp
- 000001F4  C3				ret
-					
- 000001F5			bubbleSort	ENDP
+ 000001F8  5D				pop		ebp
+ 000001F9  C3				ret
+ 000001FA			bubbleSort	ENDP
 							
- 000001F5			sorting		PROC
-					; flag is stored at +16
+
+				; sort given array with size num. takes in array and num as paramaters, and requires the array is populated with num values
+				; this will sort the array (by reference) using what should be pretty similiar to bubble sort
+				; but is slightly haunted by caffiene and having been written at 1am.
+				; I appreciate your patience with grading this.
+				; touches ebp, esp, eax, ecx, esi
+				; after running array will be sorted highest to lowest
+ 000001FA			sorting		PROC
+					; flag is stored at +16 but isn't used right now'
 					; num is stored at +12
 					; array is stored at +8
- 000001F5  55				push	ebp
- 000001F6  8B EC			mov		ebp, esp
+ 000001FA  55				push	ebp
+ 000001FB  8B EC			mov		ebp, esp
 
- 000001F8  8B 45 0C			mov		eax, [ebp+12]
- 000001FB  8B C8			mov		ecx, eax		; put user num in loop counter for outer loop
+ 000001FD  8B 45 0C			mov		eax, [ebp+12]
+ 00000200  8B C8			mov		ecx, eax		; put user num in loop counter for outer loop
 
- 000001FD  8B 75 08			mov		esi, [ebp+8]	; put array in esi
+ 00000202  8B 75 08			mov		esi, [ebp+8]	; put array in esi
 
 					;inc		ecx		; start from 1 in from end
 
- 00000200				outer:
- 00000200  51					push	ecx		;save for later
- 00000201  8B 4D 0C				mov		ecx, [ebp+12]	;get user num again
- 00000204  8B 75 08				mov		esi, [ebp+8]	; load arr again from start
+ 00000205				outer:
+ 00000205  51					push	ecx		;save for later
+ 00000206  8B 4D 0C				mov		ecx, [ebp+12]	;get user num again
+ 00000209  8B 75 08				mov		esi, [ebp+8]	; load arr again from start
 
- 00000207					inner:
- 00000207  8B 06					mov		eax, [esi]		;arr to esi
- 00000209  39 46 04					cmp		[esi+4], eax	;check against next index
- 0000020C  7C 0A					jl		contd	; don''t swap
+ 0000020C					inner:
+ 0000020C  8B 06					mov		eax, [esi]		;arr to esi
+ 0000020E  39 46 04					cmp		[esi+4], eax	;check against next index
+ 00000211  7C 0A					jl		contd	; don''t swap
 							; swap goes here
- 0000020E  8B 06					mov		eax, [esi]
- 00000210  8B 5E 04					mov		ebx, [esi+4]
- 00000213  89 1E					mov		[esi], ebx
- 00000215  89 46 04					mov		[esi+4], eax
+ 00000213  8B 06					mov		eax, [esi]
+ 00000215  8B 5E 04					mov		ebx, [esi+4]
+ 00000218  89 1E					mov		[esi], ebx
+ 0000021A  89 46 04					mov		[esi+4], eax
 
- 00000218						contd:
- 00000218  83 C6 04						add		esi, 4
- 0000021B  E2 EA						loop	inner
- 0000021D  59							pop		ecx		; restore outer loop
- 0000021E  E2 E0						loop	outer
+ 0000021D						contd:
+ 0000021D  83 C6 04						add		esi, 4
+ 00000220  E2 EA						loop	inner
+ 00000222  59							pop		ecx		; restore outer loop
+ 00000223  E2 E0						loop	outer
 
- 00000220  5D				pop		ebp
- 00000221  C2 000C			ret		12
- 00000224			sorting endp
+ 00000225  5D				pop		ebp
+ 00000226  C2 000C			ret		12
+ 00000229			sorting endp
 
- 00000224			median	proc
- 00000224  55				push	ebp
- 00000225  8B EC			mov		ebp, esp
+				; finds the median value in paramater array by dividing the size (also a param) in two
+				; just prints, doesn't mutate anything'
+				; uses ebp, esp, eax, esi, edx
+				; cases where no median exist are handled by averaging the 2 closest values, 
+				; and adding a ".5" as neccesary
+				; slightly mispelled labels are to avoid naming overlaps.
+ 00000229			median	proc
+ 00000229  55				push	ebp
+ 0000022A  8B EC			mov		ebp, esp
 
 					; array is 8
 					; size is 12
 
- 00000227  8B 45 0C			mov		eax, [ebp+12]	;l size to eax
- 0000022A  8B 75 08			mov		esi, [ebp+8]	; put array in esi
+ 0000022C  8B 45 0C			mov		eax, [ebp+12]	;l size to eax
+ 0000022F  8B 75 08			mov		esi, [ebp+8]	; put array in esi
 
- 0000022D  BA 00000000			mov		edx, 0
+ 00000232  BA 00000000			mov		edx, 0
 
- 00000232  BB 00000002			mov		ebx, 2
- 00000237  F7 F3			div		ebx	;eax / 2
- 00000239  83 FA 01			cmp		edx, 1	;remainder
- 0000023C  74 02			je		oddd
- 0000023E  EB 16			jmp		evenn
+ 00000237  BB 00000002			mov		ebx, 2
+ 0000023C  F7 F3			div		ebx	;eax / 2
+ 0000023E  83 FA 01			cmp		edx, 1	;remainder
+ 00000241  74 02			je		oddd
+ 00000243  EB 16			jmp		evenn
 
- 00000240				oddd:	
+ 00000245				oddd:	
 						; target is in eax
- 00000240  BB 00000004				mov		ebx, four
- 00000245  F7 E3				mul		ebx
- 00000247  E8 00000000 E			call	crlf
- 0000024C  8B 04 06				mov		eax,  [esi + eax]
- 0000024F  E8 00000000 E			call	writedec
- 00000254  EB 48				jmp		outside
- 00000256				evenn:
+ 00000245  BB 00000004				mov		ebx, four
+ 0000024A  F7 E3				mul		ebx
+ 0000024C  E8 00000000 E			call	crlf
+ 00000251  8B 04 06				mov		eax,  [esi + eax]
+ 00000254  E8 00000000 E			call	writedec
+ 00000259  EB 48				jmp		outside		; like end but w/ a different name
+ 0000025B				evenn:
 						; target is in eax
- 00000256  48					dec		eax		; step into middle
- 00000257  BB 00000004				mov		ebx, four
- 0000025C  F7 E3				mul		ebx
- 0000025E  8B D8				mov		ebx, eax
- 00000260  E8 00000000 E			call	crlf
- 00000265  8B 04 1E				mov		eax,  [esi + ebx]
- 00000268  83 C3 04				add		ebx, four
- 0000026B  03 04 1E				add		eax, [esi + ebx]	;get next as well
- 0000026E  BB 00000002				mov		ebx, 2
- 00000273  F7 F3				div		ebx	; mean of 2 closest to median in eax, but may need a .5
- 00000275  83 FA 01				cmp		edx, 1	;remainder
- 00000278  74 02				je		addfive
- 0000027A  EB 16				jmp		print
+ 0000025B  48					dec		eax		; step into middle
+ 0000025C  BB 00000004				mov		ebx, four
+ 00000261  F7 E3				mul		ebx		; to properly index the array of dwords
+ 00000263  8B D8				mov		ebx, eax
+ 00000265  E8 00000000 E			call	crlf
+ 0000026A  8B 04 1E				mov		eax,  [esi + ebx]
+ 0000026D  83 C3 04				add		ebx, four
+ 00000270  03 04 1E				add		eax, [esi + ebx]	;get next as well
+ 00000273  BB 00000002				mov		ebx, 2
+ 00000278  F7 F3				div		ebx	; mean of 2 closest to median in eax, but may need a .5
+ 0000027A  83 FA 01				cmp		edx, 1	;remainder
+ 0000027D  74 02				je		addfive
+ 0000027F  EB 16				jmp		print
 
- 0000027C					addfive:
- 0000027C  E8 00000000 E				call	crlf
- 00000281  E8 00000000 E				call	writedec
- 00000286  BA 000004A3 R				mov		edx, OFFSET	pointfive
- 0000028B  E8 00000000 E				call	writestring
- 00000290  EB 0C					jmp		outside
+ 00000281					addfive:	; add a .5 to neccessary values
+ 00000281  E8 00000000 E				call	crlf
+ 00000286  E8 00000000 E				call	writedec
+ 0000028B  BA 000004A3 R				mov		edx, OFFSET	pointfive
+ 00000290  E8 00000000 E				call	writestring
+ 00000295  EB 0C					jmp		outside
 
- 00000292					print:
- 00000292  E8 00000000 E				call	crlf
- 00000297  E8 00000000 E				call	writedec
- 0000029C  EB 00					jmp		outside
+ 00000297					print:
+ 00000297  E8 00000000 E				call	crlf
+ 0000029C  E8 00000000 E				call	writedec
+ 000002A1  EB 00					jmp		outside
 
- 0000029E				outside:
- 0000029E  5D					pop		ebp
- 0000029F  C3					ret
-
-						
-						
+ 000002A3				outside:
+ 000002A3  5D					pop		ebp
+ 000002A4  C3					ret
 					
- 000002A0  C3				ret
- 000002A1			median	endp
+ 000002A5  C2 0008			ret 8
+ 000002A8			median	endp
+
+				; asks if user wants to repeat program. uses EDX, EAX. no strict PREC. Post: user returns to main or restarts main.
+ 000002A8			goAgain PROC
+ 000002A8  E8 00000000 E	    call    Crlf
+ 000002AD  BA 000004BD R	    mov     edx, OFFSET prAgain
+ 000002B2  E8 00000000 E		call    WriteString
+ 000002B7  E8 00000000 E		call    Crlf
+
+ 000002BC  E8 00000000 E		call	ReadInt		                ;get input
+ 000002C1  E8 00000000 E		call	Crlf
+
+					; 8.1 check user input
+ 000002C6  83 F8 00			cmp eax, 0		            ;Important, check against int, not char
+ 000002C9  75 01			jne restart                    ; jump to doCalcs if usAgain is not equal to 0
+ 000002CB  C3			    RET
+
+ 000002CC			    restart:
+ 000002CC  E8 FFFFFD2F		        CALL    main    ;restart program
+ 000002D1			goagain ENDP
+
+
+				; end program. EDX. PREC: user got here by choosing no in goAgain. Post: program exits.
+ 000002D1			theEnd PROC
+ 000002D1  BA 000004DF R		mov edx, OFFSET bye
+ 000002D6  E8 00000000 E		call WriteString
+				    EXIT    ;shoot self in foot to exit early so main doesnt call this multiple times
+ 000002DB  6A 00	   *	    push   +000000000h
+ 000002DD  E8 00000000 E   *	    call   ExitProcess
+ 000002E2			theEnd ENDP
+
+
 
 				END main
-Microsoft (R) Macro Assembler Version 14.35.32216.1	    03/01/24 15:36:20
+Microsoft (R) Macro Assembler Version 14.35.32216.1	    03/01/24 16:00:45
 Assignment4 (hw4.asm					     Symbols 2 - 1
 
 
@@ -598,8 +659,8 @@ Segments and Groups:
 
 FLAT . . . . . . . . . . . . . .	GROUP
 STACK  . . . . . . . . . . . . .	32 Bit	 00001000 Para	  Stack	  'STACK'	 
-_DATA  . . . . . . . . . . . . .	32 Bit	 000004DF Para	  Public  'DATA'	
-_TEXT  . . . . . . . . . . . . .	32 Bit	 000002A1 Para	  Public  'CODE'	
+_DATA  . . . . . . . . . . . . .	32 Bit	 000004F8 Para	  Public  'DATA'	
+_TEXT  . . . . . . . . . . . . .	32 Bit	 000002E2 Para	  Public  'CODE'	
 
 
 Procedures, parameters, and locals:
@@ -706,39 +767,42 @@ WriteStackFrame  . . . . . . . .	P Near	 00000000 FLAT	Length= 00000000 External
 WriteString  . . . . . . . . . .	P Near	 00000000 FLAT	Length= 00000000 External STDCALL
 WriteToFile  . . . . . . . . . .	P Near	 00000000 FLAT	Length= 00000000 External STDCALL
 WriteWindowsMsg  . . . . . . . .	P Near	 00000000 FLAT	Length= 00000000 External STDCALL
-bubbleSort . . . . . . . . . . .	P Near	 000001C1 _TEXT	Length= 00000034 Public STDCALL
-  outer  . . . . . . . . . . . .	L Near	 000001CA _TEXT	
-  inner  . . . . . . . . . . . .	L Near	 000001D4 _TEXT	
-  swap . . . . . . . . . . . . .	L Near	 000001F1 _TEXT	
-fillArray  . . . . . . . . . . .	P Near	 00000157 _TEXT	Length= 00000023 Public STDCALL
-  again  . . . . . . . . . . . .	L Near	 00000160 _TEXT	
-getData  . . . . . . . . . . . .	P Near	 000000B5 _TEXT	Length= 000000A2 Public STDCALL
-  getNum . . . . . . . . . . . .	L Near	 000000B8 _TEXT	
-  invalidNum . . . . . . . . . .	L Near	 000000DA _TEXT	
-  getLo  . . . . . . . . . . . .	L Near	 000000EB _TEXT	
-  invalidLo  . . . . . . . . . .	L Near	 0000010D _TEXT	
-  getHi  . . . . . . . . . . . .	L Near	 0000011E _TEXT	
-  invalidHi  . . . . . . . . . .	L Near	 00000142 _TEXT	
-  ending . . . . . . . . . . . .	L Near	 00000153 _TEXT	
-intro  . . . . . . . . . . . . .	P Near	 00000091 _TEXT	Length= 00000024 Public STDCALL
-main . . . . . . . . . . . . . .	P Near	 00000000 _TEXT	Length= 00000091 Public STDCALL
-median . . . . . . . . . . . . .	P Near	 00000224 _TEXT	Length= 0000007D Public STDCALL
-  oddd . . . . . . . . . . . . .	L Near	 00000240 _TEXT	
-  evenn  . . . . . . . . . . . .	L Near	 00000256 _TEXT	
-  addfive  . . . . . . . . . . .	L Near	 0000027C _TEXT	
-  print  . . . . . . . . . . . .	L Near	 00000292 _TEXT	
-  outside  . . . . . . . . . . .	L Near	 0000029E _TEXT	
-printList  . . . . . . . . . . .	P Near	 0000017A _TEXT	Length= 00000047 Public STDCALL
-  again  . . . . . . . . . . . .	L Near	 00000195 _TEXT	
-  newline  . . . . . . . . . . .	L Near	 0000019D _TEXT	
-  print  . . . . . . . . . . . .	L Near	 000001A7 _TEXT	
-  ending . . . . . . . . . . . .	L Near	 000001BD _TEXT	
+bubbleSort . . . . . . . . . . .	P Near	 000001C6 _TEXT	Length= 00000034 Public STDCALL
+  outer  . . . . . . . . . . . .	L Near	 000001CF _TEXT	
+  inner  . . . . . . . . . . . .	L Near	 000001D9 _TEXT	
+  swap . . . . . . . . . . . . .	L Near	 000001F6 _TEXT	
+fillArray  . . . . . . . . . . .	P Near	 0000015C _TEXT	Length= 00000023 Public STDCALL
+  again  . . . . . . . . . . . .	L Near	 00000165 _TEXT	
+getData  . . . . . . . . . . . .	P Near	 000000BA _TEXT	Length= 000000A2 Public STDCALL
+  getNum . . . . . . . . . . . .	L Near	 000000BD _TEXT	
+  invalidNum . . . . . . . . . .	L Near	 000000DF _TEXT	
+  getLo  . . . . . . . . . . . .	L Near	 000000F0 _TEXT	
+  invalidLo  . . . . . . . . . .	L Near	 00000112 _TEXT	
+  getHi  . . . . . . . . . . . .	L Near	 00000123 _TEXT	
+  invalidHi  . . . . . . . . . .	L Near	 00000147 _TEXT	
+  ending . . . . . . . . . . . .	L Near	 00000158 _TEXT	
+goAgain  . . . . . . . . . . . .	P Near	 000002A8 _TEXT	Length= 00000029 Public STDCALL
+  restart  . . . . . . . . . . .	L Near	 000002CC _TEXT	
+intro  . . . . . . . . . . . . .	P Near	 00000096 _TEXT	Length= 00000024 Public STDCALL
+main . . . . . . . . . . . . . .	P Near	 00000000 _TEXT	Length= 00000096 Public STDCALL
+median . . . . . . . . . . . . .	P Near	 00000229 _TEXT	Length= 0000007F Public STDCALL
+  oddd . . . . . . . . . . . . .	L Near	 00000245 _TEXT	
+  evenn  . . . . . . . . . . . .	L Near	 0000025B _TEXT	
+  addfive  . . . . . . . . . . .	L Near	 00000281 _TEXT	
+  print  . . . . . . . . . . . .	L Near	 00000297 _TEXT	
+  outside  . . . . . . . . . . .	L Near	 000002A3 _TEXT	
+printList  . . . . . . . . . . .	P Near	 0000017F _TEXT	Length= 00000047 Public STDCALL
+  again  . . . . . . . . . . . .	L Near	 0000019A _TEXT	
+  newline  . . . . . . . . . . .	L Near	 000001A2 _TEXT	
+  print  . . . . . . . . . . . .	L Near	 000001AC _TEXT	
+  ending . . . . . . . . . . . .	L Near	 000001C2 _TEXT	
 printf . . . . . . . . . . . . .	P Near	 00000000 FLAT	Length= 00000000 External C
 scanf  . . . . . . . . . . . . .	P Near	 00000000 FLAT	Length= 00000000 External C
-sorting  . . . . . . . . . . . .	P Near	 000001F5 _TEXT	Length= 0000002F Public STDCALL
-  outer  . . . . . . . . . . . .	L Near	 00000200 _TEXT	
-  inner  . . . . . . . . . . . .	L Near	 00000207 _TEXT	
-  contd  . . . . . . . . . . . .	L Near	 00000218 _TEXT	
+sorting  . . . . . . . . . . . .	P Near	 000001FA _TEXT	Length= 0000002F Public STDCALL
+  outer  . . . . . . . . . . . .	L Near	 00000205 _TEXT	
+  inner  . . . . . . . . . . . .	L Near	 0000020C _TEXT	
+  contd  . . . . . . . . . . . .	L Near	 0000021D _TEXT	
+theEnd . . . . . . . . . . . . .	P Near	 000002D1 _TEXT	Length= 00000011 Public STDCALL
 wsprintfA  . . . . . . . . . . .	P Near	 00000000 FLAT	Length= 00000000 External C
 
 
@@ -965,6 +1029,7 @@ array  . . . . . . . . . . . . .	DWord	 00000142 _DATA
 black  . . . . . . . . . . . . .	Number	 00000000h   
 blue . . . . . . . . . . . . . .	Number	 00000001h   
 brown  . . . . . . . . . . . . .	Number	 00000006h   
+bye  . . . . . . . . . . . . . .	Byte	 000004DF _DATA	
 cyan . . . . . . . . . . . . . .	Number	 00000003h   
 exit . . . . . . . . . . . . . .	Text   	 INVOKE ExitProcess,0
 flag . . . . . . . . . . . . . .	DWord	 000004A6 _DATA	

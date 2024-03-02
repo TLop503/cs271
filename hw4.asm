@@ -43,10 +43,12 @@ FOUR		EQU		4
 
 	prMed		BYTE	"The median value: ",0
 
-	prAgain		BYTE	"Would you like to go again? (y/n)",0
+	prAgain		BYTE	"Would you like to go again? (1/0)",0
+	bye	        BYTE    "Closing program. Goodbye",0
 
 .code
 
+; main access point, where all other logic stems from
 main PROC
 	call intro
 
@@ -70,7 +72,7 @@ main PROC
 	Push	flag
 	Push	usNum
 	Push	OFFSET	array
-	;CALL	bubbleSort
+	;CALL	bubbleSort	; this is defunct and only persists for historical purposes
 	CALL	sorting
 	
 	Push	usNum
@@ -81,10 +83,13 @@ main PROC
 	push	usNum
 	push	OFFSET array
 	call	median
+
+	call	goAgain
+
 	exit
 main ENDP
 
-; print intro
+; print intro, via edx. no pre/post conditions, no paramaters.
 intro PROC
 	mov		edx, OFFSET	prIntro1
 	call	WRITESTRING
@@ -96,6 +101,11 @@ intro PROC
 	ret
 intro ENDP
 
+; prints out requests for, and then validates, input. takes usLo, usHi, and usNum.
+; touches ebp, esp, ebx, edx, eax, [ebx], ecx.
+; this could be further optimized to be called 3x, once for each inputted value, but for the sake of my 
+; sanity is handled like this
+; afterwards params will be populated
 getData	PROC
 		PUSH	ebp
 		MOV		ebp, esp	;frame
@@ -167,6 +177,9 @@ getData	PROC
 		ret		12
 getData		ENDP
 
+; populates the array with usNum values between usLo and usHi. Those are also the paramaters (array is PBR).
+; requires paramaters are correctly populated. Afterwards the array will contain random values to sort out.
+; touches ebp, esp, ecx, edi, eax, [edi]. uses a looop to smooth the proccess.
 fillArray	PROC
 		PUSH	ebp
 		MOV		ebp, esp	;frame
@@ -197,6 +210,10 @@ fillArray	PROC
 			ret	16
 fillArray	ENDP
 
+
+; print out the title paramater and the the contents of the array paramater, 10 per line. 
+; requires both params to be populated, but doesn''t actually mutuate anyhting.
+; touches ebp, esp, ecx, esi, ebx, eax, edx
 printList	PROC
 		PUSH	ebp
 		MOV		ebp, esp	;frame
@@ -225,7 +242,7 @@ printList	PROC
 			print:
 				mov		eax, [esi]
 				call	writedec
-				mov		edx, OFFSET space
+				mov		edx, OFFSET space	; for spacing
 				call	writestring
 				add		esi, 4
 				loop	again
@@ -235,7 +252,7 @@ printList	PROC
 			ret		12
 printList	ENDP		
 
-; this is defunct
+; this is defunct, here be dragons
 bubbleSort	PROC
 
 	PUSH	ebp
@@ -296,11 +313,17 @@ bubbleSort	PROC
 
 	pop		ebp
 	ret
-	
 bubbleSort	ENDP
 			
+
+; sort given array with size num. takes in array and num as paramaters, and requires the array is populated with num values
+; this will sort the array (by reference) using what should be pretty similiar to bubble sort
+; but is slightly haunted by caffiene and having been written at 1am.
+; I appreciate your patience with grading this.
+; touches ebp, esp, eax, ecx, esi
+; after running array will be sorted highest to lowest
 sorting		PROC
-	; flag is stored at +16
+	; flag is stored at +16 but isn't used right now'
 	; num is stored at +12
 	; array is stored at +8
 	push	ebp
@@ -338,6 +361,12 @@ sorting		PROC
 	ret		12
 sorting endp
 
+; finds the median value in paramater array by dividing the size (also a param) in two
+; just prints, doesn't mutate anything'
+; uses ebp, esp, eax, esi, edx
+; cases where no median exist are handled by averaging the 2 closest values, 
+; and adding a ".5" as neccesary
+; slightly mispelled labels are to avoid naming overlaps.
 median	proc
 	push	ebp
 	mov		ebp, esp
@@ -363,12 +392,12 @@ median	proc
 		call	crlf
 		mov		eax,  [esi + eax]
 		call	writedec
-		jmp		outside
+		jmp		outside		; like end but w/ a different name
 	evenn:
 		; target is in eax
 		dec		eax		; step into middle
 		mov		ebx, four
-		mul		ebx
+		mul		ebx		; to properly index the array of dwords
 		mov		ebx, eax
 		call	crlf
 		mov		eax,  [esi + ebx]
@@ -380,7 +409,7 @@ median	proc
 		je		addfive
 		jmp		print
 
-		addfive:
+		addfive:	; add a .5 to neccessary values
 			call	crlf
 			call	writedec
 			mov		edx, OFFSET	pointfive
@@ -395,11 +424,37 @@ median	proc
 	outside:
 		pop		ebp
 		ret
-
-		
-		
 	
-	ret
+	ret 8
 median	endp
+
+; asks if user wants to repeat program. uses EDX, EAX. no strict PREC. Post: user returns to main or restarts main.
+goAgain PROC
+    call    Crlf
+    mov     edx, OFFSET prAgain
+	call    WriteString
+	call    Crlf
+
+	call	ReadInt		                ;get input
+	call	Crlf
+
+	; 8.1 check user input
+	cmp eax, 0		            ;Important, check against int, not char
+	jne restart                    ; jump to doCalcs if usAgain is not equal to 0
+    RET
+
+    restart:
+        CALL    main    ;restart program
+goagain ENDP
+
+
+; end program. EDX. PREC: user got here by choosing no in goAgain. Post: program exits.
+theEnd PROC
+	mov edx, OFFSET bye
+	call WriteString
+    EXIT    ;shoot self in foot to exit early so main doesnt call this multiple times
+theEnd ENDP
+
+
 
 END main
